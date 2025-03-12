@@ -1,0 +1,4 @@
+/dist
+**/build/
+sdkconfig.old
+dependencies.lock
