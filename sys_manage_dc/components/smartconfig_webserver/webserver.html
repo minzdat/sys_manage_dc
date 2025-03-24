@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Config WiFi</title>
+    <script>
+
+      var xhttp1 = new XMLHttpRequest();
+      function myFunction() {
+        var ssid = document.getElementById("ssid").value;
+        var pass = document.getElementById("pass").value;
+        var data = ssid + "/" + pass;
+        xhttp1.open("POST", "/post", true);
+        xhttp1.send(data);  
+      }
+
+      function fetchSSIDs() {
+        fetch('/ssid.json')
+          .then(response => response.json())
+          .then(data => {
+            let ssidList = document.getElementById('ssidList');
+            ssidList.innerHTML = '';
+            data.ssids.forEach((ssid, index) => {
+              let li = document.createElement('li');
+              li.textContent = `SSID[${index}]: ${ssid}`;
+              ssidList.appendChild(li);
+            });
+          })
+          .catch(err => console.error('Error fetching JSON:', err));
+      }
+      // Lấy dữ liệu mỗi 5 giây
+      setInterval(fetchSSIDs, 5000);
+      window.onload = fetchSSIDs;
+    </script>
+  </head>
+
+  <body>
+    <h1>List WiFi</h1>
+    <ul id="ssidList"></ul>
+    
+    <label>SSID: </label>
+    <input type="text" id="ssid"><br><br>
+    <label>PASS: </label>
+    <input type="text" id="pass"><br><br>
+
+    <button onclick="myFunction()">Send WIFI Info</button>
+
+  </body>
+</html>
