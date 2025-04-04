@@ -29,7 +29,16 @@ void smartconfig_webserver_init(void)
     // ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-    
+
+    // Hủy default STA netif nếu đã tồn tại để tránh duplicate key khi tạo lại trong wifi_scan
+    esp_netif_t *sta_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+    if (sta_netif != NULL) {
+        esp_netif_destroy(sta_netif);
+    }
+    // Không khai báo lại, chỉ gán giá trị mới
+    sta_netif = esp_netif_create_default_wifi_sta();
+    assert(sta_netif);
+        
     app_config();
     // Chắc chắn đã connect wifi rồi
 }

@@ -3,10 +3,10 @@
     "idf.espIdfPathWin": "c:\\Espressif\\frameworks\\esp-idf-v5.2.2",
     "idf.pythonInstallPath": "c:\\Espressif\\tools\\tools\\idf-python\\3.11.2\\python.exe",
     "idf.openOcdConfigs": [
-        "board/esp32-wrover-kit-3.3v.cfg"
+        "board/esp32s3-builtin.cfg"
     ],
     "idf.toolsPathWin": "c:\\Espressif\\tools",
-    "idf.portWin": "COM3",
+    "idf.portWin": "COM13",
     "idf.flashType": "UART",
     "files.associations": {
         "string.h": "c",
@@ -26,6 +26,14 @@
         "rc522_mifare.h": "c",
         "cstdlib": "cpp",
         "qrcode.h": "c",
-        "button.h": "c"
+        "button.h": "c",
+        "esp_http_client.h": "c",
+        "rtdb.h": "c",
+        "task.h": "c",
+        "firebase_wrapper.h": "c",
+        "esp_event.h": "c"
+    },
+    "idf.customExtraVars": {
+        "IDF_TARGET": "esp32s3"
     }
 }

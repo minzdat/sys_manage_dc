@@ -6,6 +6,8 @@
 #include <esp_check.h>
 #include "rc522.h"
 #include "picc/rc522_mifare.h"
+#include "led_status.h"
+#include "buzzer_status.h"
 
 static const char *TAG = "RFID_RC522";
 
@@ -273,6 +275,8 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
     if (rc522_mifare_deauth(scanner, picc) != ESP_OK) {
         ESP_LOGW(TAG, "Deauth failed");
     }
+    led_status_set(LED_STATUS_RFID_DETECTED_BIT);
+    buzzer_status_set(BUZZER_STATUS_RFID_DETECTED_BIT);
 }
 
 void init_rfid(void)

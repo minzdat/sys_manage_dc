@@ -11,8 +11,8 @@ extern "C" {
 #endif
 
 // Cấu hình driver (ví dụ sử dụng chân và SPI tương tự các file mẫu)
-#define RC522_SPI_BUS_GPIO_MISO    (GPIO_NUM_19)
-#define RC522_SPI_BUS_GPIO_MOSI    (GPIO_NUM_23)
+#define RC522_SPI_BUS_GPIO_MISO    (GPIO_NUM_13)
+#define RC522_SPI_BUS_GPIO_MOSI    (GPIO_NUM_11)
 #define RC522_SPI_BUS_GPIO_SCLK    (GPIO_NUM_18)
 #define RC522_SPI_SCANNER_GPIO_SDA (GPIO_NUM_12)
 #define RC522_SCANNER_GPIO_RST     (GPIO_NUM_5) // soft-reset

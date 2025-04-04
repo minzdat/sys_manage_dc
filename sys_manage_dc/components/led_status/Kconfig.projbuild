@@ -31,8 +31,8 @@ menu "LED Status Configuration"
 
     config BLINK_GPIO
         int "Blink GPIO number"
-        range 0 39
-        default 8
+        range 0 48
+        default 48
         help
             GPIO number (IOxx) to blink on and off the LED.
             Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used to blink.

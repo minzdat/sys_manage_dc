@@ -21,6 +21,7 @@
 #include "qrcode.h"
 #include "scan_wifi.h"
 #include "led_status.h"
+#include "buzzer_status.h"
 
 static char * TAG = "CONFIG_WIFI";
 
@@ -46,23 +47,57 @@ static char ssid_array[DEFAULT_SCAN_LIST_SIZE][MAX_SSID_LENGTH + 1];
 // Khai báo biến flag toàn cục
 volatile bool in_provisioning_mode = false;
 
+static void safe_disconnect_wifi(void) {
+    esp_err_t err = esp_wifi_disconnect();
+    if (err == ESP_ERR_WIFI_NOT_CONNECT) {
+        ESP_LOGI(TAG, "No current connection, no need to disconnect");
+    } else if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Error while disconnecting: %s", esp_err_to_name(err));
+    } else {
+        ESP_LOGI(TAG, "Disconnected successfully");
+    }
+}
+
+static void safe_connect_wifi(void) {
+    esp_err_t err = esp_wifi_connect();
+    if (err == ESP_ERR_WIFI_CONN) {
+        ESP_LOGI(TAG, "Already connected, no need to connect again");
+    } else if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Error when calling connect: %s", esp_err_to_name(err));
+    } else {
+        ESP_LOGI(TAG, "Connected successfully");
+    }
+}
+
 static void event_handler(void* arg, esp_event_base_t event_base, 
                                 int32_t event_id, void* event_data)
 {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         ESP_LOGW(TAG, "WiFi start");
-        esp_wifi_connect();
+        safe_connect_wifi(); // Kết nối WiFi safe
     } 
     else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_CONNECTED) {
         ESP_LOGI(TAG, "WiFi connected (event handler)");
+
         led_status_set(LED_STATUS_NORMAL_BIT);
+        buzzer_status_set(BUZZER_STATUS_NORMAL_BIT);
+
+        xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
         ESP_LOGE(TAG, "WiFi disconnected");
+
         led_status_set(LED_STATUS_DISCONNECTED_WIFI_BIT);
-        esp_wifi_connect();
+        buzzer_status_set(BUZZER_STATUS_DISCONNECTED_WIFI_BIT);
+
+        safe_connect_wifi(); // Kết WiFi safe
+
         xEventGroupClearBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ESP_LOGW(TAG, "WiFi got IP");
+
+        led_status_set(LED_STATUS_NORMAL_BIT);
+        buzzer_status_set(BUZZER_STATUS_NORMAL_BIT);
+        
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
@@ -70,6 +105,10 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_AP_STACONNECTED) {
         ESP_LOGW(TAG, "Station connected");
+
+        led_status_set(LED_STATUS_STATION_PROVISIONING_BIT);
+        buzzer_status_set(BUZZER_STATUS_STATION_PROVISIONING_BIT);
+
         wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
         ESP_LOGI(TAG, "station " MACSTR " join, AID=%d",
                 MAC2STR(event->mac), event->aid);
@@ -83,7 +122,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
         ESP_LOGI(TAG, "station " MACSTR " leave, AID=%d",
                 MAC2STR(event->mac), event->aid);
     }    
-           
+    
     else if (event_base == SC_EVENT && event_id == SC_EVENT_SCAN_DONE) {
         ESP_LOGI(TAG, "Scan done");
     } else if (event_base == SC_EVENT && event_id == SC_EVENT_FOUND_CHANNEL) {
@@ -109,9 +148,10 @@ static void event_handler(void* arg, esp_event_base_t event_base,
         ESP_LOGI(TAG, "SSID:%s", ssid);
         ESP_LOGI(TAG, "PASSWORD:%s", password);
 
-        ESP_ERROR_CHECK( esp_wifi_disconnect() );
+        safe_disconnect_wifi();             // Ngắt kết nối WiFi safe hiện tại
         ESP_ERROR_CHECK( esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
-        esp_wifi_connect();
+        safe_connect_wifi();                // Kết nối WiFi safe mới   
+
     } else if (event_base == SC_EVENT && event_id == SC_EVENT_SEND_ACK_DONE) {
         ESP_LOGI(TAG, "ACK sent");
         xEventGroupSetBits(s_wifi_event_group, ESPTOUCH_DONE_BIT);
@@ -122,9 +162,11 @@ bool is_provisioned(void)
 {
     bool provisioned = false;
     // esp_netif_create_default_wifi_sta();
-    esp_netif_create_default_wifi_ap();
+    // esp_netif_create_default_wifi_ap();
+    
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 
     wifi_config_t wifi_config;
@@ -144,13 +186,28 @@ bool is_provisioned(void)
 
 void ap_start(void)
 {
+    // Hủy default STA netif nếu đã tồn tại để tránh duplicate key khi tạo lại trong wifi_scan
+    esp_netif_t *sta_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+    if (sta_netif != NULL) {
+        esp_netif_destroy(sta_netif);
+    }
+    // Kiểm tra và hủy interface AP cũ nếu đã tồn tại
+    esp_netif_t *ap_netif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
+    if (ap_netif != NULL) {
+        esp_netif_destroy(ap_netif);
+    }
+
+    // Tạo mới interface WiFi AP
+    ap_netif = esp_netif_create_default_wifi_ap();
+    assert(ap_netif);
+
     wifi_config_t wifi_config = {
         .ap = {
             .ssid = "wifi_config",
             .ssid_len = strlen((char*)"wifi_config"),
             .channel = 1,
-            .password = "12345678",  // mật khẩu ngắn quá thì cũng bị reset
-            .max_connection = 4,  // được 4 đứa kết nối vào
+            .password = "12345678",                     // mật khẩu ngắn quá thì cũng bị reset
+            .max_connection = 4,                        // được 4 đứa kết nối vào
             .authmode = WIFI_AUTH_WPA_WPA2_PSK
         },
     };
@@ -184,7 +241,7 @@ void http_post_data_callback (char *buf, int len)
 void app_config(void)
 {
     // Khởi tạo re_provision_task
-    xTaskCreate(re_provision_task, "re_prov_task", 4096, NULL, 5, NULL);
+    xTaskCreate(re_provision_task, "re_prov_task", 1024 * 4, NULL, 5, NULL);
 
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
@@ -210,6 +267,7 @@ void app_config(void)
         {
             ESP_LOGI(TAG, "Provisioning with Access Point");
             led_status_set(LED_STATUS_PROVISIONING_BIT);
+            buzzer_status_set(BUZZER_STATUS_PROVISIONING_BIT);
 
             // Quét WiFi và cập nhật mảng ssid_array
             wifi_scan(ssid_array);
@@ -229,13 +287,29 @@ void app_config(void)
             // convert station mode and connect router chuyển
             stop_webserver();
 
+            // Kiểm tra và hủy interface AP cũ nếu đã tồn tại
+            esp_netif_t *ap_netif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
+            if (ap_netif != NULL) {
+                esp_netif_destroy(ap_netif);
+            }
+            
+            // Hủy default STA netif nếu đã tồn tại để tránh duplicate key khi tạo lại trong wifi_scan
+            esp_netif_t *sta_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+            if (sta_netif != NULL) {
+                esp_netif_destroy(sta_netif);
+            }
+            // Không khai báo lại, chỉ gán giá trị mới
+            sta_netif = esp_netif_create_default_wifi_sta();
+            assert(sta_netif);
+
             wifi_config_t wifi_config;
             bzero(&wifi_config, sizeof(wifi_config_t));
             memcpy(wifi_config.sta.ssid, ssid, strlen(ssid));
             memcpy(wifi_config.sta.password, password, strlen(password));
           
-            wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-            ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+            // wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+            // ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
             ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
             ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
             ESP_ERROR_CHECK(esp_wifi_start());
@@ -251,11 +325,12 @@ void app_config(void)
         ESP_LOGI(TAG, "Provisioned");
         ESP_LOGI(TAG, "Provisioned WiFi SSID: %s", wifi_config.sta.ssid);
         ESP_LOGI(TAG, "Provisioned WiFi Password: %s", wifi_config.sta.password);
+
         ESP_ERROR_CHECK(esp_wifi_start());
 
         // Thực hiện reconnect
-        ESP_ERROR_CHECK(esp_wifi_disconnect());
-        ESP_ERROR_CHECK(esp_wifi_connect());
+        safe_disconnect_wifi();     // Ngắt kết nối WiFi safe hiện tại  
+        safe_connect_wifi();        // Kết nối WiFi safe mới   
     }
     xEventGroupWaitBits(s_wifi_event_group , WIFI_CONNECTED_BIT, false, true, portMAX_DELAY); 
     ESP_LOGI(TAG, "wifi connected");
@@ -275,13 +350,7 @@ void re_provision_task(void *pvParameters)
         wifi_config_t wifi_config;
         bzero(&wifi_config, sizeof(wifi_config_t));
         ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
-    
-        // Hủy default STA netif nếu đã tồn tại để tránh duplicate key khi tạo lại trong wifi_scan
-        esp_netif_t *sta_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-        if (sta_netif != NULL) {
-            esp_netif_destroy(sta_netif);
-        }
-    
+
         // Tùy chọn loại provisioning
         if (provision_type == PROVISION_SMARTCONFIG)
         {
@@ -297,7 +366,8 @@ void re_provision_task(void *pvParameters)
         {
             ESP_LOGI("REPROV_TASK", "Reprovisioning with Access Point");
             led_status_set(LED_STATUS_PROVISIONING_BIT);
-    
+            buzzer_status_set(BUZZER_STATUS_PROVISIONING_BIT);
+
             // Quét WiFi để cập nhật mảng ssid_array
             wifi_scan(ssid_array);
             if (ssid_array[0][0] == '\0') {
@@ -314,6 +384,21 @@ void re_provision_task(void *pvParameters)
             http_post_set_callback(http_post_data_callback);
             xEventGroupWaitBits(s_wifi_event_group, HTTP_CONFIG_DONE, false, true, portMAX_DELAY);
             stop_webserver();
+
+            // Kiểm tra và hủy interface AP cũ nếu đã tồn tại
+            esp_netif_t *ap_netif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
+            if (ap_netif != NULL) {
+                esp_netif_destroy(ap_netif);
+            }
+            
+            // Hủy default STA netif nếu đã tồn tại để tránh duplicate key khi tạo lại trong wifi_scan
+            esp_netif_t *sta_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+            if (sta_netif != NULL) {
+                esp_netif_destroy(sta_netif);
+            }
+            // Không khai báo lại, chỉ gán giá trị mới
+            sta_netif = esp_netif_create_default_wifi_sta();
+            assert(sta_netif);
     
             // Cấu hình lại thông tin WiFi nhận được qua HTTP POST
             wifi_config_t new_config;

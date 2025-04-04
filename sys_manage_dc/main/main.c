@@ -5,12 +5,16 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "esp_spiffs.h"
+#include "esp_http_client.h"
 #include "cJSON.h"
 
 #include "smartconfig_webserver.h"
 #include "button_ctrl.h"
 #include "led_status.h"
 #include "rfid_rc522.h"
+#include "esp_crt_bundle.h"
+#include "buzzer_status.h"
+#include "firebase_wrapper.h"
 
 // void init_spiffs(void)
 // {
@@ -83,6 +87,9 @@ void app_main(void)
     // // Chuyển mảng ssid thành file JSON và ghi vào SPIFFS
     // update_json_from_ssid_array();
     
+    // Khởi tạo component buzzer
+    buzzer_status_start();
+
     // Khởi tạo component LED
     led_status_start();
 
@@ -94,4 +101,8 @@ void app_main(void)
 
     // Khởi tạo webserver
     smartconfig_webserver_init();
+
+    // Khởi tạo Firebase
+    vTaskDelay(200 / portTICK_PERIOD_MS);
+    firebase_wrapper();
 }
