@@ -17,8 +17,6 @@
 #include "regex.h"
 #include "scan_wifi.h"
 
-#define DEFAULT_SCAN_LIST_SIZE CONFIG_SCAN_LIST_SIZE
-
 #ifdef CONFIG_USE_SCAN_CHANNEL_BITMAP
 #define USE_CHANNEL_BITMAP 1
 #define CHANNEL_LIST_SIZE 3

@@ -22,6 +22,7 @@
 #include "scan_wifi.h"
 #include "led_status.h"
 #include "buzzer_status.h"
+#include "storage_spiffs.h"
 
 static char * TAG = "CONFIG_WIFI";
 
@@ -226,97 +227,138 @@ void ap_start(void)
 }
 char ssid[33] = { 0 };
 char password[65] = { 0 };
-void http_post_data_callback (char *buf, int len)
-{
-    // ssid/pass
-    printf("%s\n", buf);
-    char *pt = strtok(buf,"/");
-    strcpy(ssid, pt);
-    printf("ssid: %s\n", pt);
-    pt = strtok(NULL,"/");
-    strcpy(password, pt);
-    printf("pass: %s\n", pt);
+
+void http_post_data_callback (char *buf, int len) {
+    // Ensure null-termination
+    if (len >= sizeof(ssid) + sizeof(password)) {
+        ESP_LOGE(TAG, "POST data too long");
+        return;
+    }
+    buf[len] = '\0'; // Null-terminate the received data
+
+    // Parse ssid and password from "ssid=...&password=..."
+    char *ssid_ptr = strstr(buf, "ssid=");
+    char *pass_ptr = strstr(buf, "password=");
+
+    if (ssid_ptr) {
+        ssid_ptr += 5; // Move past "ssid="
+        char *end = strchr(ssid_ptr, '&');
+        if (end) *end = '\0';
+        strlcpy(ssid, ssid_ptr, sizeof(ssid));
+        ESP_LOGI(TAG, "SSID: %s", ssid);
+    }
+
+    if (pass_ptr) {
+        pass_ptr += 9; // Move past "password="
+        strlcpy(password, pass_ptr, sizeof(password));
+        ESP_LOGI(TAG, "Password: %s", password);
+    }
+
     xEventGroupSetBits(s_wifi_event_group, HTTP_CONFIG_DONE);
 }
+
+// Hàm helper: Quét WiFi, tạo JSON và lưu vào SPIFFS
+static esp_err_t save_ssid_list_to_spiffs(void) {
+    // Quét WiFi
+    wifi_scan(ssid_array);
+    if (ssid_array[0][0] == '\0') {
+        ESP_LOGE(TAG, "No WiFi networks found");
+        return ESP_FAIL;
+    }
+
+    // Tính toán kích thước buffer
+    const int json_overhead = 30;
+    int buffer_size = DEFAULT_SCAN_LIST_SIZE * (MAX_SSID_LENGTH + 5) + json_overhead;
+    char *buffer = malloc(buffer_size);
+    if (!buffer) {
+        ESP_LOGE(TAG, "Memory allocation failed");
+        return ESP_ERR_NO_MEM;
+    }
+    memset(buffer, 0, buffer_size);
+
+    // Tạo JSON
+    strcat(buffer, "{\"ssids\":[");
+    bool first_entry = true;
+    for (int i = 0; i < DEFAULT_SCAN_LIST_SIZE; i++) {
+        if (ssid_array[i][0] != '\0') {
+            if (!first_entry) strcat(buffer, ",");
+            snprintf(buffer + strlen(buffer), buffer_size - strlen(buffer), 
+                    "\"%s\"", ssid_array[i]);
+            first_entry = false;
+        }
+    }
+    strcat(buffer, "]}");
+
+    // Ghi vào SPIFFS
+    esp_err_t ret = storage_spiffs_write_file("/spiffs/ssid_list.json", buffer);
+    free(buffer);
+
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to write JSON: %s", esp_err_to_name(ret));
+        return ret;
+    }
+
+    return ESP_OK;
+}
+
+// Hàm helper: Khởi động AP và Webserver để provisioning
+static void start_provisioning_ap(void) {
+    led_status_set(LED_STATUS_PROVISIONING_BIT);
+    buzzer_status_set(BUZZER_STATUS_PROVISIONING_BIT);
+
+    // Lưu danh sách SSID vào SPIFFS
+    if (save_ssid_list_to_spiffs() != ESP_OK) return;
+
+    // Khởi động AP và Webserver
+    ap_start();
+    start_webserver();
+    http_post_set_callback(http_post_data_callback);
+}
+
+// Hàm helper: Kết nối đến WiFi mới sau khi nhận cấu hình
+static void connect_to_new_wifi(void) {
+    // Dọn dẹp interface mạng
+    esp_netif_t *ap_netif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
+    if (ap_netif) esp_netif_destroy(ap_netif);
+
+    esp_netif_t *sta_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+    if (sta_netif) esp_netif_destroy(sta_netif);
+
+    // Tạo interface STA mới
+    sta_netif = esp_netif_create_default_wifi_sta();
+    assert(sta_netif);
+
+    // Cấu hình WiFi
+    wifi_config_t wifi_config = {0};
+    strncpy((char *)wifi_config.sta.ssid, ssid, sizeof(wifi_config.sta.ssid));
+    strncpy((char *)wifi_config.sta.password, password, sizeof(wifi_config.sta.password));
+
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+    ESP_ERROR_CHECK(esp_wifi_start());
+}
+
 void app_config(void)
 {
     // Khởi tạo re_provision_task
     xTaskCreate(re_provision_task, "re_prov_task", 1024 * 4, NULL, 5, NULL);
 
+    // Dang ký các sự kiện WiFi
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
     ESP_ERROR_CHECK(esp_event_handler_register(SC_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
 
     s_wifi_event_group = xEventGroupCreate();
+
     bool provisioned = is_provisioned();
     if (!provisioned)
     {
-        ESP_LOGI(TAG, "Not provisioned");
-        if (provision_type == PROVISION_SMARTCONFIG)
-        {
-            ESP_LOGI(TAG, "Provisioning with SmartConfig");
-            ESP_ERROR_CHECK(esp_wifi_start());
-            ESP_ERROR_CHECK( esp_smartconfig_set_type(SC_TYPE_ESPTOUCH) );
-            smartconfig_start_config_t cfg = SMARTCONFIG_START_CONFIG_DEFAULT();
-            ESP_ERROR_CHECK( esp_smartconfig_start(&cfg) );
-            xEventGroupWaitBits(s_wifi_event_group , ESPTOUCH_DONE_BIT, false, true, portMAX_DELAY); 
-            esp_smartconfig_stop();
-          
-        }
-        else if (provision_type == PROVISION_ACCESSPOINT)
-        {
-            ESP_LOGI(TAG, "Provisioning with Access Point");
-            led_status_set(LED_STATUS_PROVISIONING_BIT);
-            buzzer_status_set(BUZZER_STATUS_PROVISIONING_BIT);
-
-            // Quét WiFi và cập nhật mảng ssid_array
-            wifi_scan(ssid_array);
-
-            if (ssid_array[0][0] == '\0') {
-                ESP_LOGE(TAG, "No WiFi networks found");
-                return;
-            } else {
-                ESP_LOGI(TAG, "WiFi networks found");
-            }            
-        
-            ap_start();
-            start_webserver();
-            http_post_set_callback(http_post_data_callback);
-            xEventGroupWaitBits(s_wifi_event_group , HTTP_CONFIG_DONE, false, true, portMAX_DELAY); 
-
-            // convert station mode and connect router chuyển
-            stop_webserver();
-
-            // Kiểm tra và hủy interface AP cũ nếu đã tồn tại
-            esp_netif_t *ap_netif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
-            if (ap_netif != NULL) {
-                esp_netif_destroy(ap_netif);
-            }
-            
-            // Hủy default STA netif nếu đã tồn tại để tránh duplicate key khi tạo lại trong wifi_scan
-            esp_netif_t *sta_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-            if (sta_netif != NULL) {
-                esp_netif_destroy(sta_netif);
-            }
-            // Không khai báo lại, chỉ gán giá trị mới
-            sta_netif = esp_netif_create_default_wifi_sta();
-            assert(sta_netif);
-
-            wifi_config_t wifi_config;
-            bzero(&wifi_config, sizeof(wifi_config_t));
-            memcpy(wifi_config.sta.ssid, ssid, strlen(ssid));
-            memcpy(wifi_config.sta.password, password, strlen(password));
-          
-            // wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-            // ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-
-            ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-            ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
-            ESP_ERROR_CHECK(esp_wifi_start());
-            
-            // Đánh dấu đang ở chế độ provisioning
-            in_provisioning_mode = true;
-        }
+        ESP_LOGI(TAG, "Starting provisioning via Access Point");
+        start_provisioning_ap();
+        xEventGroupWaitBits(s_wifi_event_group, HTTP_CONFIG_DONE, false, true, portMAX_DELAY);
+        stop_webserver();
+        connect_to_new_wifi();
+        in_provisioning_mode = true;
     }
     else
     {
@@ -340,79 +382,20 @@ void re_provision_task(void *pvParameters)
 {
     s_wifi_event_reprovision_group = xEventGroupCreate();
     while(1) { 
-        // Chờ sự kiện reprovision trigger được set từ task khác 
-        ESP_LOGI("REPROV_TASK", "Waiting for reprovision event..."); 
         xEventGroupWaitBits(s_wifi_event_reprovision_group, REPROVISION_TRIGGER_BIT, true, true, portMAX_DELAY);
-        ESP_LOGI("REPROV_TASK", "Reprovisioning triggered");
-    
-        // Dừng WiFi và xóa cấu hình hiện tại
+        
+        // Dọn dẹp cấu hình cũ
         ESP_ERROR_CHECK(esp_wifi_stop());
-        wifi_config_t wifi_config;
-        bzero(&wifi_config, sizeof(wifi_config_t));
-        ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+        wifi_config_t empty_config = {0};
+        ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &empty_config));
 
-        // Tùy chọn loại provisioning
-        if (provision_type == PROVISION_SMARTCONFIG)
-        {
-            ESP_LOGI("REPROV_TASK", "Reprovisioning with SmartConfig");
-            ESP_ERROR_CHECK(esp_wifi_start());
-            ESP_ERROR_CHECK(esp_smartconfig_set_type(SC_TYPE_ESPTOUCH));
-            smartconfig_start_config_t cfg = SMARTCONFIG_START_CONFIG_DEFAULT();
-            ESP_ERROR_CHECK(esp_smartconfig_start(&cfg));
-            xEventGroupWaitBits(s_wifi_event_group, ESPTOUCH_DONE_BIT, false, true, portMAX_DELAY);
-            esp_smartconfig_stop();
-        }
-        else if (provision_type == PROVISION_ACCESSPOINT)
-        {
-            ESP_LOGI("REPROV_TASK", "Reprovisioning with Access Point");
-            led_status_set(LED_STATUS_PROVISIONING_BIT);
-            buzzer_status_set(BUZZER_STATUS_PROVISIONING_BIT);
-
-            // Quét WiFi để cập nhật mảng ssid_array
-            wifi_scan(ssid_array);
-            if (ssid_array[0][0] == '\0') {
-                ESP_LOGE("REPROV_TASK", "No WiFi networks found");
-                continue;  // Quay lại chờ sự kiện
-            }
-            else {
-                ESP_LOGI("REPROV_TASK", "WiFi networks found");
-            }
-    
-            // Khởi động Access Point và Webserver để nhận cấu hình từ người dùng
-            ap_start();
-            start_webserver();
-            http_post_set_callback(http_post_data_callback);
-            xEventGroupWaitBits(s_wifi_event_group, HTTP_CONFIG_DONE, false, true, portMAX_DELAY);
-            stop_webserver();
-
-            // Kiểm tra và hủy interface AP cũ nếu đã tồn tại
-            esp_netif_t *ap_netif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
-            if (ap_netif != NULL) {
-                esp_netif_destroy(ap_netif);
-            }
-            
-            // Hủy default STA netif nếu đã tồn tại để tránh duplicate key khi tạo lại trong wifi_scan
-            esp_netif_t *sta_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-            if (sta_netif != NULL) {
-                esp_netif_destroy(sta_netif);
-            }
-            // Không khai báo lại, chỉ gán giá trị mới
-            sta_netif = esp_netif_create_default_wifi_sta();
-            assert(sta_netif);
-    
-            // Cấu hình lại thông tin WiFi nhận được qua HTTP POST
-            wifi_config_t new_config;
-            bzero(&new_config, sizeof(wifi_config_t));
-            memcpy(new_config.sta.ssid, ssid, strlen(ssid));
-            memcpy(new_config.sta.password, password, strlen(password));
-    
-            wifi_init_config_t init_cfg = WIFI_INIT_CONFIG_DEFAULT();
-            ESP_ERROR_CHECK(esp_wifi_init(&init_cfg));
-            ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-            ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &new_config));
-            ESP_ERROR_CHECK(esp_wifi_start());
-        }
-    
+        // Reprovisioning
+        ESP_LOGI(TAG, "Starting reprovisioning via Access Point");
+        start_provisioning_ap();
+        xEventGroupWaitBits(s_wifi_event_group, HTTP_CONFIG_DONE, false, true, portMAX_DELAY);
+        stop_webserver();
+        connect_to_new_wifi();
+       
         // Đợi kết nối thành công
         xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT, false, true, portMAX_DELAY);
         ESP_LOGI("REPROV_TASK", "Reprovisioning complete, WiFi connected");

@@ -12,6 +12,7 @@ extern "C" {
  * sau đó in ra các thông tin của các Access Point (SSID, RSSI, chế độ bảo mật, …).
  */
 #define MAX_SSID_LENGTH 32
+#define DEFAULT_SCAN_LIST_SIZE CONFIG_SCAN_LIST_SIZE
 
 void wifi_scan(char ssid_array[][MAX_SSID_LENGTH + 1]);
 

@@ -31,7 +31,9 @@
         "rtdb.h": "c",
         "task.h": "c",
         "firebase_wrapper.h": "c",
-        "esp_event.h": "c"
+        "esp_event.h": "c",
+        "storage_spiffs.h": "c",
+        "event_groups.h": "c"
     },
     "idf.customExtraVars": {
         "IDF_TARGET": "esp32s3"

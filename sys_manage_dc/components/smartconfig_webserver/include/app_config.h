@@ -13,10 +13,8 @@ typedef enum
     PROVISION_SMARTCONFIG = 1,
 } provision_type_t;
 
-#define DEFAULT_SCAN_LIST_SIZE 10
-#define MAX_SSID_LENGTH 32
-
-#define REPROVISION_TRIGGER_BIT BIT0
+#define MAX_SSID_LENGTH                 32
+#define REPROVISION_TRIGGER_BIT         BIT0
 
 extern EventGroupHandle_t s_wifi_event_reprovision_group;
 extern volatile bool in_provisioning_mode;

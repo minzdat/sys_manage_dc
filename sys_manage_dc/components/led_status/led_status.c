@@ -82,11 +82,26 @@ static void led_configure(void)
 #error "unsupported LED type"
 #endif
 
+#ifdef CONFIG_BLINK_LED_STRIP
 static void led_set_color(uint8_t red, uint8_t green, uint8_t blue)
 {
     led_strip_set_pixel(led_strip, 0, red, green, blue);
     led_strip_refresh(led_strip);
 }
+#elif CONFIG_BLINK_LED_GPIO
+// For GPIO, you might not have color control; you could map the LED on/off state or implement a different function.
+static void led_set_color(uint8_t red, uint8_t green, uint8_t blue)
+{
+    // Turn the LED on if any color is non-zero; off otherwise.
+    if (red || green || blue) {
+        gpio_set_level(BLINK_GPIO, 1);
+    } else {
+        gpio_set_level(BLINK_GPIO, 0);
+    }
+}
+#else
+#error "unsupported LED type"
+#endif
 
 /* Hàm trả về điểm ưu tiên cao nhất của mask trạng thái LED.
    Lưu ý: sử dụng các giá trị ưu tiên giống như buzzer_status để đảm bảo tính nhất quán */
