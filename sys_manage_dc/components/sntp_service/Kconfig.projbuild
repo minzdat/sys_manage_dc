@@ -1,0 +1,15 @@
+menu "SNTP Service Configuration"
+
+    config SNTP_SERVER_LIST
+        string "List of NTP servers"
+        default "pool.ntp.org"
+        help
+            List of NTP servers to use for time synchronization.
+
+    config SNTP_SMOOTH_SYNC
+        bool "Smooth time sync"
+        default y
+        help
+            Use smooth time sync to avoid sudden jumps in time.
+
+endmenu

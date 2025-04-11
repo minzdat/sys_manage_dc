@@ -2,7 +2,7 @@
 #define  _ESP_FIREBASE_H_
 #include "esp_http_client.h"
 #include "cJSON.h"
-
+#include <string>
 
 #define HTTP_RECV_BUFFER_SIZE 4096
 

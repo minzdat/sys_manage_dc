@@ -1,4 +1,3 @@
-
 #include <iostream>
 
 #include "freertos/FreeRTOS.h"
@@ -88,6 +87,7 @@ void FirebaseApp::firebaseClientInit(void)
     config.url = "https://google.com";  // URL hợp lệ để khởi tạo HTTP client
     config.event_handler = http_event_handler;
     // Gắn certificate bundle qua cấu hình (đảm bảo ESP-IDF version của bạn hỗ trợ trường này)
+    config.timeout_ms = 10000; // Thời gian timeout 10 giây
     config.crt_bundle_attach = esp_crt_bundle_attach;
     config.user_data = FirebaseApp::local_response_buffer;
     config.buffer_size_tx = 4096;

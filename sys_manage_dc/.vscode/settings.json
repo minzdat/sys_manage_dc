@@ -33,7 +33,19 @@
         "firebase_wrapper.h": "c",
         "esp_event.h": "c",
         "storage_spiffs.h": "c",
-        "event_groups.h": "c"
+        "event_groups.h": "c",
+        "array": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "span": "cpp",
+        "firebase_config.h": "c",
+        "temperature_sensor.h": "c",
+        "time.h": "c",
+        "buzzer_status.h": "c",
+        "esp_err.h": "c",
+        "sntp_service.h": "c",
+        "temp_sensor.h": "c",
+        "esp_crt_bundle.h": "c"
     },
     "idf.customExtraVars": {
         "IDF_TARGET": "esp32s3"

@@ -5,10 +5,13 @@
 #include "rc522.h"
 #include "picc/rc522_mifare.h"
 #include "driver/rc522_spi.h"
+#include "com_firestore.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+extern char *g_deviceId;
 
 // Cấu hình driver (ví dụ sử dụng chân và SPI tương tự các file mẫu)
 #define RC522_SPI_BUS_GPIO_MISO    (GPIO_NUM_13)
@@ -23,6 +26,7 @@ extern "C" {
 #define RFID_ACTION_READ_SPECIFIED   0x04
 #define RFID_ACTION_DELETE_SPECIFIED 0x08
 #define RFID_ACTION_DELETE_ALL       0x10
+#define RFID_ACTION_REGIST_SER       0x20 
 
 /**
  * @brief Thực hiện các hành động trên thẻ RFID dựa vào bitmask actions.

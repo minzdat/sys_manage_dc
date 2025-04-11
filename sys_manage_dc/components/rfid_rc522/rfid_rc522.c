@@ -241,6 +241,30 @@ esp_err_t rfid_component_execute(uint8_t actions, rc522_handle_t scanner, rc522_
         }
     }
 
+    // 6. Action mới: Gửi signal đăng ký thú cưng đến task rfid_pet_registration_task
+    if (actions & RFID_ACTION_REGIST_SER) {
+        ESP_LOGI(TAG, "Sending registration signal to rfid_pet_registration_task");
+
+        // Tạo một sự kiện (rfid_event_t). Dữ liệu này có thể được chỉnh sửa tùy thuộc yêu cầu thực tế
+        rfid_event_t event;
+
+        char uid_str[RC522_PICC_UID_STR_BUFFER_SIZE_MAX + 1] = {0};
+        for (int i = 0; i < picc->uid.length; i++) {
+            // Sử dụng sprintf để chuyển đổi mỗi byte thành 2 ký tự hex.
+            sprintf(uid_str + i * 2, "%02x", picc->uid.value[i]);
+        }
+
+        strncpy(event.uid, uid_str, sizeof(event.uid));
+        strncpy(event.rfidReaderId, g_deviceId, sizeof(event.rfidReaderId));
+
+        // Gửi event vào hàng đợi, timeout có thể là 0 (không chờ) hoặc tùy chỉnh
+        if (xQueueSend(rfid_event_queue, &event, 0) != pdTRUE) {
+            ESP_LOGE(TAG, "Failed to send registration event to rfid_pet_registration_task");
+            ret = ESP_FAIL;
+        } else {
+            ESP_LOGI(TAG, "Registration signal sent successfully");
+        }
+    }
     return ret;
 }
 
@@ -263,7 +287,7 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
     }
 
     // Thực hiện các hành động trên thẻ RFID
-    uint8_t actions = RFID_ACTION_READ_SPECIFIED;
+    uint8_t actions = RFID_ACTION_REGIST_SER;
     const char *sample_data = "HELLO RFID";
     esp_err_t ret = rfid_component_execute(actions, scanner, picc, sample_data, 4);
     if (ret == ESP_OK) {
@@ -275,6 +299,7 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
     if (rc522_mifare_deauth(scanner, picc) != ESP_OK) {
         ESP_LOGW(TAG, "Deauth failed");
     }
+    
     led_status_set(LED_STATUS_RFID_DETECTED_BIT);
     buzzer_status_set(BUZZER_STATUS_RFID_DETECTED_BIT);
 }
