@@ -37,6 +37,8 @@ static int get_status_priority(uint32_t bits)
     int priority = -1;
     if (bits & BUZZER_STATUS_RFID_DETECTED_BIT)
         priority = (PRIORITY_RFID_DETECTED > priority) ? PRIORITY_RFID_DETECTED : priority;
+    if (bits & BUZZER_STATUS_SET_MODE_DEVICE_BIT)
+        priority = (PRIORITY_SET_MODE_DEVICE > priority) ? PRIORITY_SET_MODE_DEVICE : priority;
     if (bits & BUZZER_STATUS_PROVISIONING_BIT)
         priority = (PRIORITY_PROVISIONING > priority) ? PRIORITY_PROVISIONING : priority;
     if (bits & BUZZER_STATUS_STATION_PROVISIONING_BIT)
@@ -62,6 +64,7 @@ static void buzzer_status_task(void *pvParameter)
 
     /* Mask các bit trạng thái quan tâm */
     const EventBits_t wait_bits_mask = BUZZER_STATUS_RFID_DETECTED_BIT |
+                                         BUZZER_STATUS_SET_MODE_DEVICE_BIT |
                                          BUZZER_STATUS_PROVISIONING_BIT |
                                          BUZZER_STATUS_STATION_PROVISIONING_BIT |
                                          BUZZER_STATUS_DISCONNECTED_WIFI_BIT |
@@ -82,6 +85,17 @@ static void buzzer_status_task(void *pvParameter)
 
         if (bits & BUZZER_STATUS_RFID_DETECTED_BIT) {
             ESP_LOGI(TAG, "RFID detected, beep on");
+            buzzer_on();
+            vTaskDelay(beep_on_detect_rfid_delay);
+            buzzer_off();
+            vTaskDelay(beep_off_detect_rfid_delay);
+            continue;
+        } else if (bits & BUZZER_STATUS_SET_MODE_DEVICE_BIT) {
+            ESP_LOGI(TAG, "Set mode device, beep pattern");
+            buzzer_on();
+            vTaskDelay(beep_on_detect_rfid_delay);
+            buzzer_off();
+            vTaskDelay(beep_off_detect_rfid_delay);
             buzzer_on();
             vTaskDelay(beep_on_detect_rfid_delay);
             buzzer_off();
@@ -139,8 +153,9 @@ void buzzer_status_init(void)
     }
 
     xEventGroupClearBits(buzzer_event_group,
-        BUZZER_STATUS_STATION_PROVISIONING_BIT | BUZZER_STATUS_RFID_DETECTED_BIT | BUZZER_STATUS_INIT_DEVICE |
-        BUZZER_STATUS_NORMAL_BIT | BUZZER_STATUS_DISCONNECTED_WIFI_BIT | BUZZER_STATUS_PROVISIONING_BIT);
+        BUZZER_STATUS_STATION_PROVISIONING_BIT | BUZZER_STATUS_RFID_DETECTED_BIT | BUZZER_STATUS_SET_MODE_DEVICE_BIT | 
+        BUZZER_STATUS_INIT_DEVICE | BUZZER_STATUS_NORMAL_BIT | BUZZER_STATUS_DISCONNECTED_WIFI_BIT | 
+        BUZZER_STATUS_PROVISIONING_BIT);
     xEventGroupSetBits(buzzer_event_group, BUZZER_STATUS_INIT_DEVICE);
     current_status = BUZZER_STATUS_INIT_DEVICE;
 }
@@ -156,9 +171,10 @@ void buzzer_status_set(uint32_t status)
 
     ESP_LOGI(TAG, "Current state saved: %u", (unsigned int)last_status);
 
-    // Nếu trạng thái mới giống với trạng thái đã lưu thì bỏ qua
-    if ((last_status == status) & (status != BUZZER_STATUS_RFID_DETECTED_BIT)) {
-        ESP_LOGW(TAG, "Status %u is set, skip updates", (unsigned int)status);
+    // Bỏ qua cập nhật nếu trạng thái mới giống trạng thái cũ, 
+    // và không phải là trạng thái cần xử lý mỗi lần (RFID/SET_MODE)
+    if ((last_status == status) && ((status != BUZZER_STATUS_RFID_DETECTED_BIT) && (status != BUZZER_STATUS_SET_MODE_DEVICE_BIT))) {
+        ESP_LOGW(TAG, "Status %u is duplicate, skip update", (unsigned int)status);
         return;
     }
 
@@ -167,8 +183,9 @@ void buzzer_status_set(uint32_t status)
     if ((last_status & BUZZER_STATUS_NORMAL_BIT) || (status & BUZZER_STATUS_NORMAL_BIT)) {
         ESP_LOGI(TAG, "Update state NORMAL, skipping priority comparison");
         xEventGroupClearBits(buzzer_event_group,
-            BUZZER_STATUS_STATION_PROVISIONING_BIT | BUZZER_STATUS_RFID_DETECTED_BIT | BUZZER_STATUS_INIT_DEVICE |
-            BUZZER_STATUS_NORMAL_BIT | BUZZER_STATUS_DISCONNECTED_WIFI_BIT | BUZZER_STATUS_PROVISIONING_BIT);
+            BUZZER_STATUS_STATION_PROVISIONING_BIT | BUZZER_STATUS_RFID_DETECTED_BIT | BUZZER_STATUS_SET_MODE_DEVICE_BIT | 
+            BUZZER_STATUS_INIT_DEVICE | BUZZER_STATUS_NORMAL_BIT | BUZZER_STATUS_DISCONNECTED_WIFI_BIT | 
+            BUZZER_STATUS_PROVISIONING_BIT);
         xEventGroupSetBits(buzzer_event_group, status);
         
         current_status = status;
@@ -187,8 +204,9 @@ void buzzer_status_set(uint32_t status)
     }
 
     xEventGroupClearBits(buzzer_event_group,
-        BUZZER_STATUS_STATION_PROVISIONING_BIT | BUZZER_STATUS_RFID_DETECTED_BIT | BUZZER_STATUS_INIT_DEVICE |
-        BUZZER_STATUS_NORMAL_BIT | BUZZER_STATUS_DISCONNECTED_WIFI_BIT | BUZZER_STATUS_PROVISIONING_BIT);
+        BUZZER_STATUS_STATION_PROVISIONING_BIT | BUZZER_STATUS_RFID_DETECTED_BIT | BUZZER_STATUS_SET_MODE_DEVICE_BIT |
+        BUZZER_STATUS_INIT_DEVICE | BUZZER_STATUS_NORMAL_BIT | BUZZER_STATUS_DISCONNECTED_WIFI_BIT | 
+        BUZZER_STATUS_PROVISIONING_BIT);
     xEventGroupSetBits(buzzer_event_group, status);
 
     current_status = status;

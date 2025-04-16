@@ -10,6 +10,23 @@
 #define TIME_UPDATE_INFO_DEVICE             (60000)             // 1 phút
 
 extern QueueHandle_t rfid_event_queue;
+extern QueueHandle_t rfid_response_queue;
+
+// Định nghĩa kiểu phản hồi
+typedef struct {
+    bool success;
+    char status[16];                        // Trạng thái: "Processing", "Writing", v.v.
+    struct {
+        char name[16];                      // Tên thú cưng (1 block) - Tối đa 16 ký tự (1 block)
+        char breed[16];                     // Giống loài (1 block)
+        char gender[16];                    // Tối đa 16 ký tự (1 block)
+        char healthStatus[32];              // Tình trạng sức khỏe (2 block)
+        char vaccinationStatus[32];         // Tình trạng tiêm chủng (2 block)
+        char violationStatus[32];           // Tình trạng vi phạm (2 block)
+        double age;                         // Tuổi thú cưng (1 block)
+        // Tong cộng 10 block (16 byte/block)
+    } data;
+} rfid_response_t;
 
 // Các định nghĩa cho các thông số thiết bị
 typedef struct {

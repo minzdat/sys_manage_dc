@@ -8,8 +8,12 @@
 #include "picc/rc522_mifare.h"
 #include "led_status.h"
 #include "buzzer_status.h"
+#include "internal_rtc.h"
 
 static const char *TAG = "RFID_RC522";
+
+char last_seen_time[64] = {0};
+uint8_t action_rfid_card = RFID_ACTION_READ_SPECIFIED;
 
 static rc522_spi_config_t driver_config = {
     .host_id = SPI3_HOST,
@@ -41,7 +45,17 @@ static void hex_buffer_to_string(const uint8_t *hex_buffer, size_t len, char *ou
     output[len] = '\0';
 }
 
-static esp_err_t read_all_memory(rc522_handle_t scanner, rc522_picc_t *picc) {
+static void dump_block(uint8_t buffer[RC522_MIFARE_BLOCK_SIZE])
+{
+    for (uint8_t i = 0; i < RC522_MIFARE_BLOCK_SIZE; i++) {
+        esp_log_write(ESP_LOG_INFO, TAG, "%02" RC522_X " ", buffer[i]);
+    }
+
+    esp_log_write(ESP_LOG_INFO, TAG, "\n");
+}
+
+static esp_err_t read_all_memory(rc522_handle_t scanner, rc522_picc_t *picc) 
+{
     rc522_mifare_key_t key = { .value = { RC522_MIFARE_KEY_VALUE_DEFAULT } };
     // Với MIFARE 1K: 16 sector, mỗi sector có 4 block.
     for (uint8_t sector = 0; sector < 16; sector++) {
@@ -68,6 +82,11 @@ static esp_err_t read_all_memory(rc522_handle_t scanner, rc522_picc_t *picc) {
                 printf("%02X ", read_buffer[i]);
             }
             printf("\n");
+
+            // Chuyển đổi buffer hex thành chuỗi ký tự và in ra
+            char output_string[RC522_MIFARE_BLOCK_SIZE + 1];
+            hex_buffer_to_string(read_buffer, RC522_MIFARE_BLOCK_SIZE - 2, output_string);
+            printf("Chars: %s\n", output_string);
         }
     }
     return ESP_OK;
@@ -101,22 +120,13 @@ static esp_err_t read_specified_memory(rc522_handle_t scanner, rc522_picc_t *pic
 
     // Chuyển đổi buffer hex thành chuỗi ký tự và in ra
     char output_string[RC522_MIFARE_BLOCK_SIZE + 1];
-    hex_buffer_to_string(read_buffer, RC522_MIFARE_BLOCK_SIZE, output_string);
+    hex_buffer_to_string(read_buffer, RC522_MIFARE_BLOCK_SIZE - 2, output_string);
     printf("Chars: %s\n", output_string);
 
     return ESP_OK;
 }
 
-static void dump_block(uint8_t buffer[RC522_MIFARE_BLOCK_SIZE])
-{
-    for (uint8_t i = 0; i < RC522_MIFARE_BLOCK_SIZE; i++) {
-        esp_log_write(ESP_LOG_INFO, TAG, "%02" RC522_X " ", buffer[i]);
-    }
-
-    esp_log_write(ESP_LOG_INFO, TAG, "\n");
-}
-
-static esp_err_t read_write_memory(rc522_handle_t scanner, rc522_picc_t *picc, const char *data, uint8_t block_addr)
+static esp_err_t write_specified_memory(rc522_handle_t scanner, rc522_picc_t *picc, const char *data, uint8_t block_addr)
 {
     rc522_mifare_key_t key = { .value = { RC522_MIFARE_KEY_VALUE_DEFAULT } };
     esp_err_t ret = ESP_OK;
@@ -177,71 +187,72 @@ static esp_err_t read_write_memory(rc522_handle_t scanner, rc522_picc_t *picc, c
     return ESP_OK;
 }
 
+esp_err_t write_data_to_blocks(rc522_handle_t scanner, rc522_picc_t *picc, const char *data, uint8_t start_block) 
+{
+    uint8_t block = start_block;
+    size_t data_len = strlen(data);
+    const char *data_ptr = data;
+
+    while (data_len > 0) {
+        // Skip trailer blocks (MIFARE Classic: block % 4 == 3)
+        if ((block + 1) % 4 == 0) {
+            block++;
+        }
+
+        if (block >= 64) {
+            ESP_LOGE(TAG, "Exceeded writable block limit");
+            return ESP_ERR_NO_MEM;
+        }
+
+        char block_data[RC522_MIFARE_BLOCK_SIZE] = {0};
+        size_t copy_len = data_len < RC522_MIFARE_BLOCK_SIZE - 2 ? data_len : RC522_MIFARE_BLOCK_SIZE - 2;
+        memcpy(block_data, data_ptr, copy_len);
+
+        // Add random padding to avoid issues
+        int r = rand();
+        block_data[14] = (r >> 8) & 0xFF;
+        block_data[15] = r & 0xFF;
+
+        esp_err_t ret = write_specified_memory(scanner, picc, block_data, block);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to write block %d", block);
+            return ret;
+        }
+
+        data_ptr += copy_len;
+        data_len -= copy_len;
+        block++;
+    }
+
+    ESP_LOGI(TAG, "Successfully wrote data across blocks %d - %d", start_block, block - 1);
+    return ESP_OK;
+}
+
 esp_err_t rfid_component_execute(uint8_t actions, rc522_handle_t scanner, rc522_picc_t *picc, const char *data, uint8_t block_addr)
 {
     esp_err_t ret = ESP_OK;
     rc522_mifare_key_t key = { .value = { RC522_MIFARE_KEY_VALUE_DEFAULT } };
 
-    // 1. Đọc toàn bộ dữ liệu trong thẻ
-    if (actions & RFID_ACTION_READ) {
-        ESP_LOGI(TAG, "Reading card information:");
-        // rc522_picc_print(picc);
-        // Đọc và in toàn bộ dữ liệu của thẻ
-        ret = read_all_memory(scanner, picc);
-        if (ret == ESP_OK) {
-            ESP_LOGI(TAG, "Reading card data successful");
-        } else {
-            ESP_LOGE(TAG, "Reading card data failed, err=0x%02X", ret);
-        }
-    }    
-   
-    // 2. Đọc dữ liệu từ thẻ (đọc block cụ thể)
+    // 1. Đọc dữ liệu từ thẻ (đọc block cụ thể)
     if (actions & RFID_ACTION_READ_SPECIFIED) {
-        ESP_LOGI(TAG, "Reading data from block %d", block_addr);
-        ret = read_specified_memory(scanner, picc, block_addr);
-        if (ret == ESP_OK) {
-            ESP_LOGI(TAG, "Read specified card RFID success");
-        } else {
-            ESP_LOGE(TAG, "Read specified card RFID failed, err=0x%02X", ret);
-        }
-    }
-
-     // 3. Ghi dữ liệu vào thẻ
-     if (actions & RFID_ACTION_WRITE) {
-        ESP_LOGI(TAG, "Writing data to block %d", block_addr);
-        ret = read_write_memory(scanner, picc, data, block_addr);
-        if (ret == ESP_OK) {
-            ESP_LOGI(TAG, "Read/Write success");
-        } else {
-            ESP_LOGE(TAG, "Read/Write failed, err=0x%02X", ret);
-        }
-    }
-
-    // 4. Xóa dữ liệu được chỉ định trong thẻ (xóa block cụ thể)
-    if (actions & RFID_ACTION_DELETE_SPECIFIED) {
-        ESP_LOGI(TAG, "Erasing data at block %d", block_addr);
-        ret = read_write_memory(scanner, picc, "", block_addr);
-        if (ret == ESP_OK) {
-            ESP_LOGI(TAG, "Erase specified card RFID success");
-        } else {
-            ESP_LOGE(TAG, "Erase specified card RFID failed, err=0x%02X", ret);
-        }
-    }
-
-    // 5. Xóa toàn bộ dữ liệu trong thẻ (lặp qua các block dữ liệu)
-    if (actions & RFID_ACTION_DELETE_ALL) {
-        ESP_LOGI(TAG, "Erasing all data in the card");
-        for (uint8_t blk = 4; blk < 16; blk++) {
-            ret = read_write_memory(scanner, picc, "", blk);
+        for (int block = BLOCK_START; block <= BLOCK_END; block++) {
+            // Bỏ qua trailer block (block % 4 == 3)
+            if (block % 4 == 3) {
+                ESP_LOGI(TAG, "Skipping trailer block %d", block);
+                continue;
+            }
+        
+            ESP_LOGI(TAG, "Reading data from block %d", block);
+            ret = read_specified_memory(scanner, picc, block);
             if (ret == ESP_OK) {
-                ESP_LOGI(TAG, "Erase all memory card RFID success");
+                ESP_LOGI(TAG, "Read block %d success", block);
             } else {
-                ESP_LOGE(TAG, "Erase all memory card RFID failed, err=0x%02X", ret);
+                ESP_LOGE(TAG, "Read block %d failed, err=0x%02X", block, ret);
             }
         }
     }
 
-    // 6. Action mới: Gửi signal đăng ký thú cưng đến task rfid_pet_registration_task
+    // 2. Action mới: Gửi signal đăng ký thú cưng đến task rfid_pet_registration_task
     if (actions & RFID_ACTION_REGIST_SER) {
         ESP_LOGI(TAG, "Sending registration signal to rfid_pet_registration_task");
 
@@ -263,14 +274,140 @@ esp_err_t rfid_component_execute(uint8_t actions, rc522_handle_t scanner, rc522_
             ret = ESP_FAIL;
         } else {
             ESP_LOGI(TAG, "Registration signal sent successfully");
+
+            // Đợi phản hồi trong 5 giây
+            rfid_response_t response;
+            if (xQueueReceive(rfid_response_queue, &response, pdMS_TO_TICKS(5000))) {
+                if (response.success) {
+                    ESP_LOGI(TAG, "Registration confirmed - Status: %s", response.status);
+
+                    if (strcmp(response.status, "Writing") == 0) {
+                        ESP_LOGI(TAG, "Received pet data:");
+                        ESP_LOGI(TAG, "├─ Name: %s", response.data.name);
+                        ESP_LOGI(TAG, "├─ Breed: %s", response.data.breed);
+                        ESP_LOGI(TAG, "├─ Gender: %s", response.data.gender);
+                        ESP_LOGI(TAG, "├─ Health Status: %s", response.data.healthStatus);
+                        ESP_LOGI(TAG, "├─ Vaccination Status: %s", response.data.vaccinationStatus);
+                        ESP_LOGI(TAG, "├─ Violation Status: %s", response.data.violationStatus);
+                        ESP_LOGI(TAG, "└─ Age: %.1f", response.data.age);
+
+                        // Chuyển đổi age từ float sang string
+                        char age_str[16];
+                        snprintf(age_str, sizeof(age_str), "%.1f", response.data.age);
+
+                        // Ghi dữ liệu vào thẻ RFID
+                        ESP_LOGI(TAG, "Writing data to blocks starting from %d", block_addr);
+                        esp_err_t ret;
+                        uint8_t block_num = block_addr;
+
+                        // Ghi lần lượt từng trường dữ liệu
+                        struct {
+                            const char *label;
+                            const char *data;
+                        } fields_to_write[] = {
+                            {"NAME", response.data.name},
+                            {"BREED", response.data.breed},
+                            {"GENDER", response.data.gender},
+                            {"HEALTH STATUS", response.data.healthStatus},
+                            {"VACCINATION STATUS", response.data.vaccinationStatus},
+                            {"VIOLATION STATUS", response.data.violationStatus},
+                            {"AGE", age_str},
+                        };
+
+                        for (int i = 0; i < sizeof(fields_to_write)/sizeof(fields_to_write[0]); ++i) {
+                            if ((ret = write_data_to_blocks(scanner, picc, fields_to_write[i].data, block_num)) != ESP_OK) {
+                                ESP_LOGE(TAG, "Failed to write %s", fields_to_write[i].label);
+                                return ret;
+                            }
+                            block_num += (strlen(fields_to_write[i].data) / 14) + 1;  // Mỗi block lưu 16 byte, dự phòng ký tự null
+                        }
+
+                        ESP_LOGI(TAG, "Data written successfully to blocks %d-%d", block_addr, block_num - 1);
+                    } else if (strcmp(response.status, "Processing") == 0) {
+                        ESP_LOGW(TAG, "Registration is still being processed...");
+                    } else {
+                        ESP_LOGE(TAG, "Unknown status received: %s", response.status);
+                        ret = ESP_FAIL;
+                    }
+
+                } else {
+                    ESP_LOGE(TAG, "Registration failed - Status: %s", response.status);
+                    ESP_LOGE(TAG, "Error details: %s", response.data.name); // Giả định chứa lỗi trong `name`
+                    ret = ESP_FAIL;
+                }
+            } else {
+                ESP_LOGE(TAG, "Timeout while waiting for registration response");
+                ret = ESP_ERR_TIMEOUT;
+            }
+
         }
     }
+
+    // 3. Xóa dữ liệu từ block 4 đến 14 (bỏ qua trailer block)
+    if (actions & RFID_ACTION_DELETE_SPECIFIED) {
+        ESP_LOGI(TAG, "Erasing data at block %d", block_addr);
+        for (int block = BLOCK_START; block <= BLOCK_END; block++) {
+            // Bỏ qua trailer block (block % 4 == 3)
+            if (block % 4 == 3) {
+                ESP_LOGI(TAG, "Skipping trailer block %d", block);
+                continue;
+            }
+            ret = write_specified_memory(scanner, picc, "", block);
+            if (ret == ESP_OK) {
+                ESP_LOGI(TAG, "Successfully erased blocks 4-14");
+            } else {
+                ESP_LOGE(TAG, "Erase failed, err=0x%02X", ret);
+            }
+        }
+    }
+
+    // 4. Đọc toàn bộ dữ liệu trong thẻ
+    if (actions & RFID_ACTION_READ_ALL) {
+        ESP_LOGI(TAG, "Reading card information:");
+        // Đọc và in toàn bộ dữ liệu của thẻ
+        ret = read_all_memory(scanner, picc);
+        if (ret == ESP_OK) {
+            ESP_LOGI(TAG, "Reading card data successful");
+        } else {
+            ESP_LOGE(TAG, "Reading card data failed, err=0x%02X", ret);
+        }
+    }    
+   
+    // 5. Xóa toàn bộ dữ liệu trong thẻ (lặp qua các block dữ liệu)
+    if (actions & RFID_ACTION_DELETE_ALL) {
+        ESP_LOGI(TAG, "Erasing all data in the card");
+        for (int block = BLOCK_START; block <= BLOCK_MAX; block++) {
+            // Bỏ qua trailer block (block % 4 == 3)
+            if (block % 4 == 3) {
+                ESP_LOGI(TAG, "Skipping trailer block %d", block);
+                continue;
+            }
+            ret = write_specified_memory(scanner, picc, "", block);
+            if (ret == ESP_OK) {
+                ESP_LOGI(TAG, "Erase all memory card RFID success");
+            } else {
+                ESP_LOGE(TAG, "Erase all memory card RFID failed, err=0x%02X", ret);
+            }
+        }
+    }
+
     return ret;
 }
 
 // Hàm xử lý sự kiện khi thẻ được đưa vào vùng đọc
 static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t event_id, void *data)
 {
+    struct tm tm_update;
+
+    // Lấy thời gian hiện tại
+    if (internal_rtc_get_time(&tm_update) == 0) {
+        if (strftime(last_seen_time, sizeof(last_seen_time), "%Y-%m-%dT%H:%M:%S", &tm_update) == 0) {
+            strncpy(last_seen_time, "unknown", sizeof(last_seen_time));
+        }
+    } else {
+        strncpy(last_seen_time, "unknown", sizeof(last_seen_time));
+    }
+
     rc522_picc_state_changed_event_t *event = (rc522_picc_state_changed_event_t *)data;
     rc522_picc_t *picc = event->picc;
 
@@ -287,9 +424,10 @@ static void on_picc_state_changed(void *arg, esp_event_base_t base, int32_t even
     }
 
     // Thực hiện các hành động trên thẻ RFID
-    uint8_t actions = RFID_ACTION_REGIST_SER;
     const char *sample_data = "HELLO RFID";
-    esp_err_t ret = rfid_component_execute(actions, scanner, picc, sample_data, 4);
+    uint8_t block_addr = BLOCK_ADR_PROCESS;
+
+    esp_err_t ret = rfid_component_execute(action_rfid_card, scanner, picc, sample_data, block_addr);
     if (ret == ESP_OK) {
         ESP_LOGI(TAG, "Action done successfully");
     } else {

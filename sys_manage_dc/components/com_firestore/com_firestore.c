@@ -15,6 +15,7 @@
 #include "sys_device.h"
 #include "internal_rtc.h"
 #include "sntp_service.h"
+#include "rfid_rc522.h"
 
 static const char *TAG = "COM_FIRESTORE";
 
@@ -25,21 +26,109 @@ extern char g_resetReason[64];
 
 // Queue để nhận sự kiện RFID
 QueueHandle_t rfid_event_queue = NULL;
+QueueHandle_t rfid_response_queue = NULL;
+
+// Hàm gửi tên thú cưng qua hàng đợi RFID
+static esp_err_t send_rfid_data_by_status(const cJSON *existing_doc) 
+{
+    if (!existing_doc) {
+        ESP_LOGE(TAG, "Invalid document pointer");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    // Hiển thị toàn bộ JSON document để debug
+    // char *json_string = cJSON_Print(existing_doc);
+    // if (json_string) {
+    //     ESP_LOGI(TAG, "Document JSON:\n%s", json_string);
+    //     free(json_string);
+    // }
+
+    rfid_response_t response = {0};
+    response.success = true;
+
+    // Đọc trường status
+    const cJSON *status = cJSON_GetObjectItemCaseSensitive(existing_doc, "status");
+    const cJSON *status_value = status ? cJSON_GetObjectItem(status, "stringValue") : NULL;
+
+    if (!cJSON_IsString(status_value)) {
+        ESP_LOGW(TAG, "Missing or invalid status");
+        strncpy(response.status, "Invalid", sizeof(response.status) - 1);
+    } else {
+        strncpy(response.status, status_value->valuestring, sizeof(response.status) - 1);
+    }
+
+    // In ra Owner ID nếu có
+    const cJSON *owner = cJSON_GetObjectItemCaseSensitive(existing_doc, "ownerId");
+    const cJSON *owner_value = owner ? cJSON_GetObjectItem(owner, "stringValue") : NULL;
+    if (cJSON_IsString(owner_value)) {
+        ESP_LOGI(TAG, "Owner ID: %s", owner_value->valuestring);
+    }
+
+    // Nếu status là "Writing", trích xuất thêm dữ liệu
+    if (strcmp(response.status, "Writing") == 0) {
+        struct {
+            const char *field;
+            char *dest;
+            size_t size;
+        } fields[] = {
+            {"name", response.data.name, sizeof(response.data.name)},
+            {"breed", response.data.breed, sizeof(response.data.breed)},
+            {"gender", response.data.gender, sizeof(response.data.gender)},
+            {"healthStatus", response.data.healthStatus, sizeof(response.data.healthStatus)},
+            {"vaccinationStatus", response.data.vaccinationStatus, sizeof(response.data.vaccinationStatus)},
+            {"violationStatus", response.data.violationStatus, sizeof(response.data.violationStatus)},
+        };
+
+        for (int i = 0; i < sizeof(fields) / sizeof(fields[0]); ++i) {
+            const cJSON *obj = cJSON_GetObjectItemCaseSensitive(existing_doc, fields[i].field);
+            const cJSON *val = obj ? cJSON_GetObjectItem(obj, "stringValue") : NULL;
+            if (cJSON_IsString(val)) {
+                strncpy(fields[i].dest, val->valuestring, fields[i].size - 1);
+            } else {
+                ESP_LOGW(TAG, "Missing/invalid string: %s", fields[i].field);
+            }
+        }
+
+        // Tuổi dạng double
+        const cJSON *age = cJSON_GetObjectItemCaseSensitive(existing_doc, "age");
+        const cJSON *age_val = age ? cJSON_GetObjectItem(age, "integerValue") : NULL;
+
+        if (cJSON_IsString(age_val)) {
+            char* endptr;
+            response.data.age = strtod(age_val->valuestring, &endptr);
+            if (*endptr != '\0') {
+                ESP_LOGW(TAG, "Invalid age format: %s", age_val->valuestring);
+                response.data.age = 0.0;
+            }
+        } else {
+            ESP_LOGW(TAG, "Missing/invalid age");
+            response.data.age = 0.0;
+        }
+    }
+
+    // Luôn gửi dữ liệu vào hàng đợi
+    BaseType_t q_result = xQueueSend(rfid_response_queue, &response, pdMS_TO_TICKS(5000));
+    if (q_result != pdTRUE) {
+        ESP_LOGE(TAG, "Queue send failed");
+        return ESP_ERR_TIMEOUT;
+    }
+
+    ESP_LOGI(TAG, "RFID response sent - Status: %s", response.status);
+    return ESP_OK;
+}
 
 // Hàm chuyển đổi uptime sang định dạng ISO 8601 (P...T...)
-char* calculate_uptime_device(time_t boot, time_t current)
+void calculate_uptime_device(time_t boot, time_t current, char *out_buf, size_t buf_size)
 {
-    static char iso8601_str[32];
     uint32_t diff = (uint32_t)(current - boot);
-    uint32_t days    = diff / 86400;
-    uint32_t hours   = (diff % 86400) / 3600;
+    uint32_t days = diff / 86400;
+    uint32_t hours = (diff % 86400) / 3600;
     uint32_t minutes = (diff % 3600) / 60;
     uint32_t seconds = diff % 60;
 
-    snprintf(iso8601_str, sizeof(iso8601_str), "P%luDT%02luH%02luM%02luS",
+    snprintf(out_buf, buf_size, "P%luDT%02luH%02luM%02luS",
              (unsigned long)days, (unsigned long)hours,
              (unsigned long)minutes, (unsigned long)seconds);
-    return iso8601_str;
 }
 
 // Hàm chuyển đổi MAC thành chuỗi không dấu và chữ thường
@@ -62,84 +151,125 @@ void update_info_device_task(void *pvParameters)
         vTaskDelete(NULL);
         return;
     }
-    
-    // Chuẩn bị chuỗi normalized MAC từ g_deviceId
+
+    // Chuẩn hóa g_deviceId thành chuỗi MAC
     char norm_device_id[32] = {0};
     normalize_mac_address(g_deviceId, norm_device_id, sizeof(norm_device_id));
 
-    // Tạo tên document theo định dạng "device_<normalized_mac>"
+    // Tên document = "device_<normalized_mac>"
     char document_name[40] = {0};
     snprintf(document_name, sizeof(document_name), "device_%s", norm_device_id);
-    
-    cJSON *device_data = NULL;
-    float temperature;
-    int8_t rssi; 
-    struct tm tm_update;    
-    int result;
-    char update_time[TIME_STR_SIZE] = {0}; 
-    time_t now = 0, boot_time = 0;
-    char *uptime = NULL;
-    struct tm tm_boot;
 
-    // Chuyển đổi chuỗi g_lastBootTime sang struct tm
-    if (strptime(g_lastBootTime, "%Y-%m-%dT%H:%M:%S", &tm_boot) == NULL) {
-        ESP_LOGW(TAG, "Failed to parse boot time string");
-    } else {
+    float temperature;
+    int8_t rssi;
+    time_t now = 0, boot_time = 0;
+    char update_time[TIME_STR_SIZE] = {0};
+    struct tm tm_update, tm_boot;
+
+    static bool device_registered = false;
+    static bool boot_info_updated = false;
+
+    // Phân tích g_lastBootTime thành thời gian thực
+    if (strptime(g_lastBootTime, "%Y-%m-%dT%H:%M:%S", &tm_boot)) {
         boot_time = mktime(&tm_boot);
+    } else {
+        ESP_LOGW(TAG, "Failed to parse boot time string");
+        time(&boot_time);
     }
 
     while (1) {
-        device_data = cJSON_CreateObject();
-        if (!device_data) {
-            ESP_LOGE(TAG, "Failed to create JSON object");
-        } else {
-            temperature = sys_device_get_temperature();
-            rssi = sys_device_get_wifi_rssi();
+        temperature = sys_device_get_temperature();
+        rssi = sys_device_get_wifi_rssi();
 
-            if (internal_rtc_get_time(&tm_update) == 0) {
-                now = mktime(&tm_update); 
-                if (strftime(update_time, sizeof(update_time), "%Y-%m-%dT%H:%M:%S", &tm_update) == 0) {
-                    ESP_LOGW(TAG, "strftime failed");
-                    strncpy(update_time, "unknown", sizeof(update_time));
-                }
-            } else {
-                time(&now);
+        // Lấy thời gian hiện tại
+        if (internal_rtc_get_time(&tm_update) == 0) {
+            now = mktime(&tm_update);
+            if (strftime(update_time, sizeof(update_time), "%Y-%m-%dT%H:%M:%S", &tm_update) == 0) {
                 strncpy(update_time, "unknown", sizeof(update_time));
             }
-            uptime = calculate_uptime_device(boot_time, now);
-
-            cJSON_AddStringToObject(device_data, "firmwareVersion", FIRMWARE_VERSION);
-            cJSON_AddStringToObject(device_data, "uid", norm_device_id);
-            cJSON_AddStringToObject(device_data, "rfidModuleType", MODULE_RFID_TYPE);
-            cJSON_AddStringToObject(device_data, "acceptedCards", ACCEPTED_CARD_TYPE);
-            cJSON_AddStringToObject(device_data, "lastBootTime", g_lastBootTime);
-            cJSON_AddNumberToObject(device_data, "temperatureCelsius", temperature);
-            cJSON_AddNumberToObject(device_data, "rssi", rssi);
-            cJSON_AddStringToObject(device_data, "lastUpdateTime", update_time);
-            cJSON_AddStringToObject(device_data, "uptime", uptime);
-            cJSON_AddStringToObject(device_data, "startupInfo", g_resetReason);
-        }
-
-        // Kiểm tra sự tồn tại của document trên Firestore
-        cJSON *existing_doc = firestore_get_document(firestore, "rfidReaderDevices", document_name);
-        if (!existing_doc) {
-            result = firestore_create_document(firestore, "rfidReaderDevices", document_name, device_data);
-            if (result == 0) {
-                ESP_LOGI(TAG, "Device registered successfully on Firestore");
-            } else {
-                ESP_LOGE(TAG, "Device registration failed, result = %d", result);
-            }
         } else {
-            cJSON_Delete(existing_doc);
-            result = firestore_update_document(firestore, "rfidReaderDevices", document_name, device_data);
-            if (result == 0) {
-                ESP_LOGI(TAG, "Device data updated: temperature=%.2f °C, rssi=%d, update_time=%s, uptime=%s", 
-                    temperature, rssi, update_time, uptime);
+            time(&now);
+            strncpy(update_time, "unknown", sizeof(update_time));
+        }
+
+        char uptime[32] = {0};
+        calculate_uptime_device(boot_time, now, uptime, sizeof(uptime));
+
+        if (!device_registered) {
+            // Kiểm tra xem document có tồn tại chưa
+            cJSON *existing_doc = firestore_get_document(firestore, "rfidReaderDevices", document_name);
+            if (!existing_doc) {
+                // Tạo dữ liệu khởi tạo thiết bị
+                cJSON *init_data = cJSON_CreateObject();
+                if (init_data) {
+                    cJSON_AddStringToObject(init_data, "firmwareVersion", FIRMWARE_VERSION);
+                    cJSON_AddStringToObject(init_data, "rfidModelType", MODULE_RFID_TYPE);
+                    cJSON_AddStringToObject(init_data, "acceptedCards", ACCEPTED_CARD_TYPE);
+                    cJSON_AddStringToObject(init_data, "lastBootTime", g_lastBootTime);
+                    cJSON_AddStringToObject(init_data, "startupInfo", g_resetReason);
+                    cJSON_AddStringToObject(init_data, "status", "Active"); 
+                    cJSON_AddNumberToObject(init_data, "temperatureCelsius", temperature);
+                    cJSON_AddNumberToObject(init_data, "rssi", rssi);
+                    cJSON_AddStringToObject(init_data, "lastUpdateTime", update_time);
+                    cJSON_AddStringToObject(init_data, "uptime", uptime);
+                    cJSON_AddStringToObject(init_data, "createAt", g_lastBootTime);
+
+                    int result = firestore_create_document(firestore, "rfidReaderDevices", document_name, init_data);
+                    if (result == 0) {
+                        ESP_LOGI(TAG, "Device registered successfully");
+                        device_registered = true;
+                        boot_info_updated = true;
+                    } else {
+                        ESP_LOGE(TAG, "Device registration failed, result = %d", result);
+                    }
+
+                    cJSON_Delete(init_data);
+                }
             } else {
-                ESP_LOGE(TAG, "Failed to update device data, result = %d", result);
+                device_registered = true;
+                cJSON_Delete(existing_doc);
+            }
+        } 
+        // Nếu đã đăng ký và chưa cập nhật boot info sau reset, thì update
+        if (device_registered && !boot_info_updated) {
+            cJSON *boot_update = cJSON_CreateObject();
+            if (boot_update) {
+                cJSON_AddStringToObject(boot_update, "lastBootTime", g_lastBootTime);
+                cJSON_AddStringToObject(boot_update, "startupInfo", g_resetReason);
+
+                int result = firestore_update_document(firestore, "rfidReaderDevices", document_name, boot_update);
+                if (result == 0) {
+                    ESP_LOGI(TAG, "Boot info updated after device reset");
+                    boot_info_updated = true;
+                } else {
+                    ESP_LOGE(TAG, "Failed to update boot info, result = %d", result);
+                }
+
+                cJSON_Delete(boot_update);
             }
         }
-        cJSON_Delete(device_data);
+        
+        // Cập nhật thông tin định kỳ
+        if (device_registered) {
+            // Chỉ cập nhật thông tin thay đổi thường xuyên
+            cJSON *update_data = cJSON_CreateObject();
+            if (update_data) {
+                cJSON_AddNumberToObject(update_data, "temperatureCelsius", temperature);
+                cJSON_AddNumberToObject(update_data, "rssi", rssi);
+                cJSON_AddStringToObject(update_data, "lastUpdateTime", update_time);
+                cJSON_AddStringToObject(update_data, "uptime", uptime);
+
+                int result = firestore_update_document(firestore, "rfidReaderDevices", document_name, update_data);
+                if (result == 0) {
+                    ESP_LOGI(TAG, "Device updated: temp=%.2f, rssi=%d, time=%s, uptime=%s", temperature, rssi, update_time, uptime);
+                } else {
+                    ESP_LOGE(TAG, "Device update failed, result = %d", result);
+                }
+
+                cJSON_Delete(update_data);
+            }
+        }
+
         vTaskDelay(TIME_UPDATE_INFO_DEVICE / portTICK_PERIOD_MS);
     }
 
@@ -156,14 +286,23 @@ void rfid_pet_registration_task(void *pvParameters)
         vTaskDelete(NULL);
         return;
     }
-    rfid_event_queue = xQueueCreate(10, sizeof(rfid_event_t));
 
+    rfid_event_queue = xQueueCreate(10, sizeof(rfid_event_t));
     if (rfid_event_queue == NULL) {
         ESP_LOGE(TAG, "Failed to create RFID event queue");
     } else {
         ESP_LOGI(TAG, "RFID event queue created successfully");
     }
+
+    rfid_response_queue = xQueueCreate(10, sizeof(rfid_response_t));
+    if (rfid_response_queue == NULL) {
+        ESP_LOGE(TAG, "Failed to create RFID event queue");
+    } else {
+        ESP_LOGI(TAG, "RFID event queue created successfully");
+    }
+
     rfid_event_t rfid_event;
+
     while (1) {
         // Nhận sự kiện RFID từ queue
         if (xQueueReceive(rfid_event_queue, &rfid_event, portMAX_DELAY) == pdTRUE) {
@@ -176,22 +315,22 @@ void rfid_pet_registration_task(void *pvParameters)
                 continue;
             }
 
-            cJSON_AddStringToObject(petData, "ownerId", "");  
             cJSON_AddStringToObject(petData, "name", "");
+            cJSON_AddNumberToObject(petData, "age", 0);
             cJSON_AddStringToObject(petData, "species", "");                 
             cJSON_AddStringToObject(petData, "breed", "");
-            cJSON_AddNumberToObject(petData, "age", 0);
             cJSON_AddStringToObject(petData, "gender", "");
-            cJSON_AddStringToObject(petData, "chipCard", ACCEPTED_CARD_TYPE);
-            cJSON_AddStringToObject(petData, "uid", rfid_event.uid);
+            cJSON_AddStringToObject(petData, "ownerId", "");  
 
             // Lưu ID đầu đọc RFID từ sự kiện
             char norm_rfid_reader_id[32] = {0};
             normalize_mac_address( rfid_event.rfidReaderId, norm_rfid_reader_id, sizeof(norm_rfid_reader_id));
             cJSON_AddStringToObject(petData, "rfidReaderId", norm_rfid_reader_id);
 
-            cJSON_AddStringToObject(petData, "status", "Registering");
+            cJSON_AddStringToObject(petData, "chipCard", ACCEPTED_CARD_TYPE);
+            cJSON_AddStringToObject(petData, "status", "Processing");
 
+            // Lưu thời gian cập nhật
             char update_time_regist[TIME_STR_SIZE] = {0}; 
             struct tm tm_update_regist;    
             if (internal_rtc_get_time(&tm_update_regist) == 0) {
@@ -202,10 +341,25 @@ void rfid_pet_registration_task(void *pvParameters)
             } else {
                 strncpy(update_time_regist, "unknown", sizeof(update_time_regist));
             }
-
-            // Lưu thời gian cập nhật
             cJSON_AddStringToObject(petData, "createdAt", update_time_regist);
-            cJSON_AddStringToObject(petData, "updatedAt", update_time_regist);
+            cJSON_AddStringToObject(petData, "lastUpdateTime", update_time_regist);
+
+            // Chuẩn hóa g_deviceId thành chuỗi MAC
+            char norm_device_id[32] = {0};
+            normalize_mac_address(g_deviceId, norm_device_id, sizeof(norm_device_id));
+
+            // Tên document = "device_<normalized_mac>"
+            char account_modified[40] = {0};
+            snprintf(account_modified, sizeof(account_modified), "device_%s", norm_device_id);
+
+            cJSON_AddStringToObject(petData, "lastModifiedBy", account_modified);
+            cJSON_AddStringToObject(petData, "lastSeenAt", last_seen_time);
+            cJSON_AddStringToObject(petData, "healthStatus", "Normal");                 
+            cJSON_AddStringToObject(petData, "lastCheckHealthDate", update_time_regist);
+            cJSON_AddStringToObject(petData, "vaccinationStatus", "");                 
+            cJSON_AddStringToObject(petData, "lastVaccineDate", update_time_regist);
+            cJSON_AddStringToObject(petData, "violationStatus", "");                 
+            cJSON_AddStringToObject(petData, "lastViolationDate", update_time_regist);
 
             // Tạo tên document theo định dạng "pet_<uid>"
             char document_name[80] = {0};
@@ -219,38 +373,16 @@ void rfid_pet_registration_task(void *pvParameters)
                 result = firestore_create_document(firestore, "pets", document_name, petData);
                 if (result == 0) {
                     ESP_LOGI(TAG, "Pet registration successful for UID: %s", rfid_event.uid);
-
-                    // =========================================================
-                    // Tạo Document cho Subcollection "Violations"
-                    // =========================================================
-                    cJSON *violationData = cJSON_CreateObject();
-                    if (violationData) {
-                        cJSON_AddStringToObject(violationData, "violationType", "None");
-                        cJSON_AddStringToObject(violationData, "description", "None");
-                        cJSON_AddStringToObject(violationData, "date", update_time_regist);
-                        cJSON_AddStringToObject(violationData, "status", "Processing");
-                        cJSON_AddStringToObject(violationData, "createdAt", update_time_regist);
-
-                        // Đường dẫn tới subcollection "violations" nằm trong document pet
-                        char violationPath[150] = {0};
-                        snprintf(violationPath, sizeof(violationPath), "pets/%s/violations", document_name);
-
-                        int violation_result = firestore_create_document(firestore, violationPath, "violation_001", violationData);
-                        if (violation_result == 0) {
-                            ESP_LOGI(TAG, "Subcollection 'violations' document created successfully for pet UID: %s", rfid_event.uid);
-                        } else {
-                            ESP_LOGE(TAG, "Failed to create document in subcollection 'violations', error code = %d", violation_result);
-                        }
-                        cJSON_Delete(violationData);
-                    } else {
-                        ESP_LOGE(TAG, "Failed to create JSON object for violation data");
+                    cJSON *new_doc = firestore_get_document(firestore, "pets", document_name);
+                    if (new_doc) {
+                        send_rfid_data_by_status(new_doc);
+                        cJSON_Delete(new_doc);
                     }
-                    
                 } else {
                     ESP_LOGE(TAG, "Pet registration failed, error code = %d", result);
                 }
             } else {
-                // Nếu document đã tồn tại, bỏ qua lượt đăng ký này.
+                send_rfid_data_by_status(existing_doc);
                 ESP_LOGW(TAG, "Pet already registered for UID: %s, skipping registration.", rfid_event.uid);
                 cJSON_Delete(existing_doc);
             }

@@ -12,6 +12,8 @@ extern "C" {
 #endif
 
 extern char *g_deviceId;
+extern char last_seen_time[64];
+extern uint8_t action_rfid_card;
 
 // Cấu hình driver (ví dụ sử dụng chân và SPI tương tự các file mẫu)
 #define RC522_SPI_BUS_GPIO_MISO    (GPIO_NUM_13)
@@ -21,12 +23,16 @@ extern char *g_deviceId;
 #define RC522_SCANNER_GPIO_RST     (GPIO_NUM_5) // soft-reset
 
 /* Định nghĩa các bit hành động */
-#define RFID_ACTION_READ             0x01
-#define RFID_ACTION_WRITE            0x02
-#define RFID_ACTION_READ_SPECIFIED   0x04
-#define RFID_ACTION_DELETE_SPECIFIED 0x08
-#define RFID_ACTION_DELETE_ALL       0x10
-#define RFID_ACTION_REGIST_SER       0x20 
+#define RFID_ACTION_READ_SPECIFIED          0x04
+#define RFID_ACTION_REGIST_SER              0x20 
+#define RFID_ACTION_DELETE_SPECIFIED        0x08
+#define RFID_ACTION_READ_ALL                0x01
+#define RFID_ACTION_DELETE_ALL              0x10
+
+#define BLOCK_ADR_PROCESS               4
+#define BLOCK_START                     4
+#define BLOCK_END                       14
+#define BLOCK_MAX                       16
 
 /**
  * @brief Thực hiện các hành động trên thẻ RFID dựa vào bitmask actions.

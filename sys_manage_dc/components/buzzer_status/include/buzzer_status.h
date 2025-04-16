@@ -17,6 +17,7 @@ extern "C" {
 #define PRIORITY_STATION_PROVISIONING  4
 #define PRIORITY_DISCONNECTED_WIFI     4
 #define PRIORITY_RFID_DETECTED         2
+#define PRIORITY_SET_MODE_DEVICE       2
 #define PRIORITY_NORMAL                5
 #define PRIORITY_INIT_DEVICE           0
 
@@ -27,6 +28,7 @@ extern "C" {
 #define BUZZER_STATUS_STATION_PROVISIONING_BIT (1 << 3)
 #define BUZZER_STATUS_INIT_DEVICE              (1 << 4)
 #define BUZZER_STATUS_RFID_DETECTED_BIT        (1 << 5)
+#define BUZZER_STATUS_SET_MODE_DEVICE_BIT      (1 << 6)
 
 /**
  * @brief Khởi tạo component buzzer_status.

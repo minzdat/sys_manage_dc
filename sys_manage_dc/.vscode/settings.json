@@ -45,7 +45,9 @@
         "esp_err.h": "c",
         "sntp_service.h": "c",
         "temp_sensor.h": "c",
-        "esp_crt_bundle.h": "c"
+        "esp_crt_bundle.h": "c",
+        "internal_rtc.h": "c",
+        "rfid_rc522.h": "c"
     },
     "idf.customExtraVars": {
         "IDF_TARGET": "esp32s3"

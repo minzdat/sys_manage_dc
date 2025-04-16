@@ -10,5 +10,5 @@
 #define DATABASE_URL "https://sys-manage-dc-9c480-default-rtdb.firebaseio.com/"  
 #define FIRESTORE_PROJECT_ID "sys-manage-dc-9c480" 
 
-#define USER_EMAIL "esp32@sysmanagedc.com"   // This gmail does not exist outside your database. it only exists in the firebase project as a user
-#define USER_PASSWORD "helloworld"      // Dont add your gmail credentials. Setup users authentication in your Firebase project first
+#define USER_EMAIL "device_b43a45a20688@sysmanagedc.com"   // This gmail does not exist outside your database. it only exists in the firebase project as a user
+#define USER_PASSWORD "device_b43a45a20688"      // Dont add your gmail credentials. Setup users authentication in your Firebase project first
