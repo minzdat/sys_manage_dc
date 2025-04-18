@@ -155,8 +155,8 @@ static esp_err_t write_specified_memory(rc522_handle_t scanner, rc522_picc_t *pi
     strncpy((char *)write_buffer, data, RC522_MIFARE_BLOCK_SIZE);
     // Set ngẫu nhiên cho 2 byte cuối để đảm bảo dữ liệu thay đổi mỗi lần ghi
     int r = rand();
-    write_buffer[RC522_MIFARE_BLOCK_SIZE - 2] = ((r >> 8) & 0xFF);
-    write_buffer[RC522_MIFARE_BLOCK_SIZE - 1] = ((r >> 0) & 0xFF);
+    write_buffer[RC522_MIFARE_BLOCK_SIZE - 2] = (r >> 8) & 0xFF; // Byte 14
+    write_buffer[RC522_MIFARE_BLOCK_SIZE - 1] = r & 0xFF;        // Byte 15
 
     ESP_LOGI(TAG, "Writing data (%s) to block %d:", data, block_addr);
     dump_block(write_buffer);
@@ -187,44 +187,45 @@ static esp_err_t write_specified_memory(rc522_handle_t scanner, rc522_picc_t *pi
     return ESP_OK;
 }
 
-esp_err_t write_data_to_blocks(rc522_handle_t scanner, rc522_picc_t *picc, const char *data, uint8_t start_block) 
-{
-    uint8_t block = start_block;
+esp_err_t write_data_to_blocks(rc522_handle_t scanner, rc522_picc_t *picc, const char *data, uint8_t *block_num) {
     size_t data_len = strlen(data);
     const char *data_ptr = data;
+    uint8_t current_block = *block_num;
 
     while (data_len > 0) {
-        // Skip trailer blocks (MIFARE Classic: block % 4 == 3)
-        if ((block + 1) % 4 == 0) {
-            block++;
+        // Bỏ qua trailer block (block % 4 == 3)
+        while ((current_block % 4) == 3) {
+            current_block++;
+            if (current_block >= 64) {
+                ESP_LOGE(TAG, "Exceeded block limit");
+                return ESP_ERR_NO_MEM;
+            }
         }
 
-        if (block >= 64) {
-            ESP_LOGE(TAG, "Exceeded writable block limit");
-            return ESP_ERR_NO_MEM;
-        }
-
-        char block_data[RC522_MIFARE_BLOCK_SIZE] = {0};
-        size_t copy_len = data_len < RC522_MIFARE_BLOCK_SIZE - 2 ? data_len : RC522_MIFARE_BLOCK_SIZE - 2;
+        // Copy tối đa 14 byte vào block_data (để trống 2 byte cuối)
+        size_t copy_len = (data_len < 14) ? data_len : 14;
+        char block_data[RC522_MIFARE_BLOCK_SIZE] = {0}; // Tự động khởi tạo toàn bộ block thành 0
         memcpy(block_data, data_ptr, copy_len);
 
-        // Add random padding to avoid issues
-        int r = rand();
-        block_data[14] = (r >> 8) & 0xFF;
-        block_data[15] = r & 0xFF;
-
-        esp_err_t ret = write_specified_memory(scanner, picc, block_data, block);
+        // Gọi hàm write_specified_memory để ghi block (2 byte cuối sẽ được thêm ở đây)
+        esp_err_t ret = write_specified_memory(scanner, picc, block_data, current_block);
         if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to write block %d", block);
+            ESP_LOGE(TAG, "Failed to write block %d", current_block);
             return ret;
         }
 
+        // Cập nhật con trỏ và block hiện tại
         data_ptr += copy_len;
         data_len -= copy_len;
-        block++;
+        current_block++;
+
+        if (current_block >= 64) {
+            ESP_LOGE(TAG, "Exceeded block limit");
+            return ESP_ERR_NO_MEM;
+        }
     }
 
-    ESP_LOGI(TAG, "Successfully wrote data across blocks %d - %d", start_block, block - 1);
+    *block_num = current_block; // Cập nhật vị trí block sau khi ghi xong
     return ESP_OK;
 }
 
@@ -267,7 +268,7 @@ esp_err_t rfid_component_execute(uint8_t actions, rc522_handle_t scanner, rc522_
 
         strncpy(event.uid, uid_str, sizeof(event.uid));
         strncpy(event.rfidReaderId, g_deviceId, sizeof(event.rfidReaderId));
-
+        event.action = RFID_ACTION_REGIST_SER;
         // Gửi event vào hàng đợi, timeout có thể là 0 (không chờ) hoặc tùy chỉnh
         if (xQueueSend(rfid_event_queue, &event, 0) != pdTRUE) {
             ESP_LOGE(TAG, "Failed to send registration event to rfid_pet_registration_task");
@@ -286,10 +287,15 @@ esp_err_t rfid_component_execute(uint8_t actions, rc522_handle_t scanner, rc522_
                         ESP_LOGI(TAG, "├─ Name: %s", response.data.name);
                         ESP_LOGI(TAG, "├─ Breed: %s", response.data.breed);
                         ESP_LOGI(TAG, "├─ Gender: %s", response.data.gender);
-                        ESP_LOGI(TAG, "├─ Health Status: %s", response.data.healthStatus);
-                        ESP_LOGI(TAG, "├─ Vaccination Status: %s", response.data.vaccinationStatus);
-                        ESP_LOGI(TAG, "├─ Violation Status: %s", response.data.violationStatus);
+                        // ESP_LOGI(TAG, "├─ Health Status: %s", response.data.healthStatus);
+                        // ESP_LOGI(TAG, "├─ Vaccination Status: %s", response.data.vaccinationStatus);
+                        // ESP_LOGI(TAG, "├─ Violation Status: %s", response.data.violationStatus);
                         ESP_LOGI(TAG, "└─ Age: %.1f", response.data.age);
+                        ESP_LOGI(TAG, "└─ OwnerId: %s", response.data.ownerId);
+
+                        ESP_LOGI(TAG, "Received owner data:");
+                        ESP_LOGI(TAG, "├─ FullName: %s", response.data.fullName);
+                        ESP_LOGI(TAG, "└─ Phone: %s", response.data.phone);
 
                         // Chuyển đổi age từ float sang string
                         char age_str[16];
@@ -308,23 +314,30 @@ esp_err_t rfid_component_execute(uint8_t actions, rc522_handle_t scanner, rc522_
                             {"NAME", response.data.name},
                             {"BREED", response.data.breed},
                             {"GENDER", response.data.gender},
-                            {"HEALTH STATUS", response.data.healthStatus},
-                            {"VACCINATION STATUS", response.data.vaccinationStatus},
-                            {"VIOLATION STATUS", response.data.violationStatus},
+                            // {"HEALTH STATUS", response.data.healthStatus},
+                            // {"VACCINATION STATUS", response.data.vaccinationStatus},
+                            // {"VIOLATION STATUS", response.data.violationStatus},
                             {"AGE", age_str},
+                            {"OWNER ID", response.data.ownerId},
+                            {"OWNER NAME", response.data.fullName},
+                            {"OWNER PHONE", response.data.phone},
                         };
 
                         for (int i = 0; i < sizeof(fields_to_write)/sizeof(fields_to_write[0]); ++i) {
-                            if ((ret = write_data_to_blocks(scanner, picc, fields_to_write[i].data, block_num)) != ESP_OK) {
+                            if (write_data_to_blocks(scanner, picc, fields_to_write[i].data, &block_num) != ESP_OK) {
                                 ESP_LOGE(TAG, "Failed to write %s", fields_to_write[i].label);
-                                return ret;
+                                return ESP_FAIL;
                             }
-                            block_num += (strlen(fields_to_write[i].data) / 14) + 1;  // Mỗi block lưu 16 byte, dự phòng ký tự null
                         }
 
                         ESP_LOGI(TAG, "Data written successfully to blocks %d-%d", block_addr, block_num - 1);
+
+                        xSemaphoreGive(rfid_write_done_sema);
+                        ESP_LOGI(TAG, "Data written and semaphore given");
                     } else if (strcmp(response.status, "Processing") == 0) {
                         ESP_LOGW(TAG, "Registration is still being processed...");
+                    }else if (strcmp(response.status, "Active") == 0) {
+                        ESP_LOGW(TAG, "Card is already active, no action needed");
                     } else {
                         ESP_LOGE(TAG, "Unknown status received: %s", response.status);
                         ret = ESP_FAIL;
@@ -345,18 +358,53 @@ esp_err_t rfid_component_execute(uint8_t actions, rc522_handle_t scanner, rc522_
 
     // 3. Xóa dữ liệu từ block 4 đến 14 (bỏ qua trailer block)
     if (actions & RFID_ACTION_DELETE_SPECIFIED) {
-        ESP_LOGI(TAG, "Erasing data at block %d", block_addr);
-        for (int block = BLOCK_START; block <= BLOCK_END; block++) {
-            // Bỏ qua trailer block (block % 4 == 3)
-            if (block % 4 == 3) {
-                ESP_LOGI(TAG, "Skipping trailer block %d", block);
-                continue;
-            }
-            ret = write_specified_memory(scanner, picc, "", block);
-            if (ret == ESP_OK) {
-                ESP_LOGI(TAG, "Successfully erased blocks 4-14");
+        ESP_LOGI(TAG, "Erasing data to Firestore");
+
+        // Tạo một sự kiện (rfid_event_t). Dữ liệu này có thể được chỉnh sửa tùy thuộc yêu cầu thực tế
+        rfid_event_t event;
+
+        char uid_str[RC522_PICC_UID_STR_BUFFER_SIZE_MAX + 1] = {0};
+        for (int i = 0; i < picc->uid.length; i++) {
+            // Sử dụng sprintf để chuyển đổi mỗi byte thành 2 ký tự hex.
+            sprintf(uid_str + i * 2, "%02x", picc->uid.value[i]);
+        }
+
+        strncpy(event.uid, uid_str, sizeof(event.uid));
+        strncpy(event.rfidReaderId, g_deviceId, sizeof(event.rfidReaderId));
+        event.action = RFID_ACTION_DELETE_SPECIFIED;
+        
+        // Gửi event vào hàng đợi, timeout có thể là 0 (không chờ) hoặc tùy chỉnh
+        if (xQueueSend(rfid_event_queue, &event, 0) != pdTRUE) {
+            ESP_LOGE(TAG, "Failed to send registration event to rfid_pet_registration_task");
+            ret = ESP_FAIL;
+        } else {
+            ESP_LOGI(TAG, "Registration signal sent successfully");
+
+            // Đợi phản hồi trong 5 giây
+            rfid_response_t response;
+            if (xQueueReceive(rfid_delete_response_queue, &response, pdMS_TO_TICKS(5000))) {
+                if (response.success) {
+                    ESP_LOGI(TAG, "Erasing data at block %d", block_addr);
+                    for (int block = BLOCK_START; block <= BLOCK_END; block++) {
+                        // Bỏ qua trailer block (block % 4 == 3)
+                        if (block % 4 == 3) {
+                            ESP_LOGI(TAG, "Skipping trailer block %d", block);
+                            continue;
+                        }
+                        ret = write_specified_memory(scanner, picc, "", block);
+                        if (ret == ESP_OK) {
+                            ESP_LOGI(TAG, "Successfully erased blocks 4-14");
+                        } else {
+                            ESP_LOGE(TAG, "Erase failed, err=0x%02X", ret);
+                        }
+                    }
+                } else {
+                    ESP_LOGE(TAG, "Registration failed - Status: %s", response.status);
+                    ret = ESP_FAIL;
+                }
             } else {
-                ESP_LOGE(TAG, "Erase failed, err=0x%02X", ret);
+                ESP_LOGE(TAG, "Timeout while waiting for registration response");
+                ret = ESP_ERR_TIMEOUT;
             }
         }
     }
@@ -459,4 +507,8 @@ void init_rfid(void)
     rc522_start(scanner);
 
     ESP_LOGI(TAG, "RFID scanner initialized");
+
+    // Khởi tạo semaphore (trạng thái ban đầu: unavailable)
+    rfid_write_done_sema = xSemaphoreCreateBinary();
+    configASSERT(rfid_write_done_sema != NULL);
 }

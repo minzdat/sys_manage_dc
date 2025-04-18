@@ -31,8 +31,8 @@ extern uint8_t action_rfid_card;
 
 #define BLOCK_ADR_PROCESS               4
 #define BLOCK_START                     4
-#define BLOCK_END                       14
-#define BLOCK_MAX                       16
+#define BLOCK_END                       15
+#define BLOCK_MAX                       63
 
 /**
  * @brief Thực hiện các hành động trên thẻ RFID dựa vào bitmask actions.
