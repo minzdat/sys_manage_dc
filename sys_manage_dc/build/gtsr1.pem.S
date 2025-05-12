@@ -1,4 +1,4 @@
-/* * Data converted from C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/components/esp_firebase/gtsr1.pem
+/* * Data converted from C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/components/esp_firebase/gtsr1.pem
  * (null byte appended)
  */
 .data

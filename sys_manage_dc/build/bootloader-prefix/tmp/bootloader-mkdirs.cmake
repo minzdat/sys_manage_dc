@@ -5,18 +5,18 @@ cmake_minimum_required(VERSION 3.5)
 
 file(MAKE_DIRECTORY
   "C:/Espressif/frameworks/esp-idf-v5.2.2/components/bootloader/subproject"
-  "C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/bootloader"
-  "C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/bootloader-prefix"
-  "C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/bootloader-prefix/tmp"
-  "C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/bootloader-prefix/src/bootloader-stamp"
-  "C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/bootloader-prefix/src"
-  "C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/bootloader-prefix/src/bootloader-stamp"
+  "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/bootloader"
+  "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/bootloader-prefix"
+  "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/bootloader-prefix/tmp"
+  "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/bootloader-prefix/src/bootloader-stamp"
+  "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/bootloader-prefix/src"
+  "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/bootloader-prefix/src/bootloader-stamp"
 )
 
 set(configSubDirs )
 foreach(subDir IN LISTS configSubDirs)
-    file(MAKE_DIRECTORY "C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
+    file(MAKE_DIRECTORY "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
 endforeach()
 if(cfgdir)
-  file(MAKE_DIRECTORY "C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
+  file(MAKE_DIRECTORY "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
 endif()

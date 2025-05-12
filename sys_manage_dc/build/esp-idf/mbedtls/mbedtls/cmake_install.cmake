@@ -39,10 +39,10 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/mbedtls/mbedtls/include/cmake_install.cmake")
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/mbedtls/mbedtls/3rdparty/cmake_install.cmake")
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/mbedtls/mbedtls/library/cmake_install.cmake")
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/mbedtls/mbedtls/pkgconfig/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/mbedtls/mbedtls/include/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/mbedtls/mbedtls/3rdparty/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/mbedtls/mbedtls/library/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/mbedtls/mbedtls/pkgconfig/cmake_install.cmake")
 
 endif()
 

@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/components/sys_device
+# Install script for directory: C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/components/sys_device
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

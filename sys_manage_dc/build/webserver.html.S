@@ -1,4 +1,4 @@
-/* * Data converted from C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/components/smartconfig_webserver/webserver.html
+/* * Data converted from C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/components/smartconfig_webserver/webserver.html
  */
 .data
 .section .rodata.embedded
