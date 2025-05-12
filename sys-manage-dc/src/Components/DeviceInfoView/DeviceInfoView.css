@@ -1,0 +1,220 @@
+:root {
+    --primary-color: #2F85EF;
+    --text-color: #333;
+    --warning-color: #ff4757;
+    --background-light: #f8f9fa;
+    --border-color: #e9ecef;
+  }
+  
+  /* Base styles */
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: var(--text-color);
+    background: #fff;
+    line-height: 1.42857143;
+  }
+  
+  .page-request {
+    background-color: #fff;
+    font-size: 14px;
+  }
+  
+  .page-content {
+    width: 100%;
+    height: calc(100vh - 204px);
+    margin-top: 125px;
+    padding: 15px;
+    overflow: auto;
+  }
+  
+  .title-request {
+    color: #434343;
+    text-align: center;
+    font-size: 30px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.1;
+    font-weight: 700;
+  }
+  
+  /* Form components */
+  .form-approver {
+    margin: 50px 10px 0 0;
+    
+    h6 {
+      font-size: 1.1em;
+      font-weight: 300;
+      margin: 0 0 10px;
+    }
+  }
+  
+  .col-request {
+    margin-bottom: 15px;
+    padding: 0 15px;
+    
+    label {
+      display: inline-block;
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
+  
+    /* Ant Design overrides */
+    .ant-form-item {
+      .ant-form-item-label {
+        padding: 0;
+      }
+      
+      .ant-form-item-control-input-content {
+        input, .ant-select-selector, .ant-picker {
+          border: none;
+          border-radius: 0;
+          border-bottom: 1px solid var(--primary-color);
+          height: 53px;
+          width: 100%;
+          padding: 6px 12px;
+          color: var(--primary-color);
+          background-color: #fff;
+          
+          &:focus, &:hover {
+            box-shadow: none;
+          }
+        }
+        
+        .ant-select-arrow, .anticon-calendar {
+          color: var(--primary-color);
+        }
+      }
+    }
+  }
+  
+  /* Data visualization */
+  .device-info-card {
+    margin: 20px auto;
+    max-width: 80%;
+    width: 80%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    margin-top: 30px;
+
+    .ant-descriptions {
+      &-item-label {
+        font-weight: 600 !important;
+        color: #2f3542 !important;
+        background: var(--background-light) !important;
+        border-right: 2px solid var(--border-color) !important;
+      }
+      
+      &-item-content {
+        padding: 12px 0 !important;
+      }
+    }
+  }
+  
+  /* Special text styles */
+  .highlight-value {
+    color: var(--primary-color);
+    font-weight: 500;
+  }
+  
+  .temperature-warning {
+    color: var(--warning-color);
+    font-weight: 600;
+    animation: pulse 1.5s infinite;
+  }
+  
+  .code-block {
+    background: var(--background-light);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  
+  .uptime-display {
+    background: #e3f2fd;
+    padding: 6px 12px;
+    border-radius: 18px;
+    display: inline-block;
+    font-weight: 500;
+  }
+  
+  /* Utilities */
+  .responsive-limit-width-ellipsis {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .cursor-notallow {
+    cursor: not-allowed;
+  }
+  
+  /* Animations */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  
+  /* Responsive adjustments */
+  @media screen and (max-width: 1200px) {
+    .device-info-card .ant-descriptions-item {
+      width: 50% !important;
+    }
+  }
+  
+@media screen and (max-width: 768px) {
+  .page-request {
+    margin-left: 80px;
+  }
+  
+  .page-content {
+    height: calc(100vh - 160px);
+    margin-top: 100px;
+  }
+  
+  .title-request {
+    font-size: 24px;
+  }
+  
+  .device-info-card {
+    margin: 10px auto;
+    width: 90%; /* Thêm dòng này */
+    max-width: 90%; /* Thêm dòng này */
+    
+    .ant-descriptions-item {
+      width: 100% !important;
+      display: flex !important;
+      flex-direction: column;
+      
+      &-label {
+        background: transparent !important;
+        padding-bottom: 8px !important;
+      }
+    }
+  }
+  
+  .responsive-limit-width-ellipsis {
+    max-width: 200px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .page-content {
+    margin-top: 80px;
+    padding: 10px;
+  }
+  
+  .form-approver {
+    margin-top: 30px;
+  }
+  
+  .device-info-card {
+    width: 95%; /* Thêm dòng này */
+    max-width: 95%; /* Thêm dòng này */
+  }
+}

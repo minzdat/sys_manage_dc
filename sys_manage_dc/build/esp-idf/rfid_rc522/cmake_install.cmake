@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/components/rfid_rc522
+# Install script for directory: C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/components/rfid_rc522
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

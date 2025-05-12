@@ -1,0 +1,40 @@
+dependencies:
+  abobija/rc522:
+    component_hash: 45869b7a266329f19dbc84a878c97acdd20535ff7cdc4ed9c8cdbff7f8420d70
+    dependencies:
+    - name: idf
+      require: private
+      version: ^5.0
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 3.3.1
+  espressif/led_strip:
+    component_hash: b578eb926d9f6402fd45398b53c9bd5d1b7a15c1b2974d25aa3088e6c79b0b4c
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 3.0.1
+  espressif/qrcode:
+    component_hash: 3b493771bc5d6ad30cbf87c25bf784aada8a08c941504355b55d6b75518ed7bc
+    dependencies: []
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 0.1.0~2
+  idf:
+    source:
+      type: idf
+    version: 5.2.2
+direct_dependencies:
+- abobija/rc522
+- espressif/led_strip
+- espressif/qrcode
+- idf
+manifest_hash: 548a55fa86c875401b345bdf6f5baea763b7ae0310cab487047bd901e964b5c8
+target: esp32s3
+version: 2.0.0

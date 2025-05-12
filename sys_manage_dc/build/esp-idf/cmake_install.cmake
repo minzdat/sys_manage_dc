@@ -39,461 +39,461 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/xtensa/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/xtensa/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_ringbuf/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_ringbuf/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/efuse/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/efuse/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_mm/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_mm/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/driver/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/driver/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_pm/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_pm/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/mbedtls/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/mbedtls/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_bootloader_format/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_bootloader_format/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_app_format/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_app_format/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/bootloader_support/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/bootloader_support/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/bootloader/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/bootloader/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esptool_py/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esptool_py/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/partition_table/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/partition_table/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_partition/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_partition/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/app_update/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/app_update/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/spi_flash/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/spi_flash/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/pthread/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/pthread/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_system/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_system/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_rom/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_rom/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/hal/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/hal/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/log/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/log/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/heap/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/heap/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/soc/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/soc/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_hw_support/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_hw_support/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/freertos/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/freertos/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/newlib/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/newlib/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/cxx/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/cxx/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_common/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_common/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_timer/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_timer/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/app_trace/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/app_trace/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_event/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_event/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/nvs_flash/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/nvs_flash/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_phy/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_phy/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/vfs/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/vfs/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/lwip/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/lwip/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_netif_stack/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_netif_stack/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_netif/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_netif/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/wpa_supplicant/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/wpa_supplicant/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_coex/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_coex/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_wifi/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_wifi/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/bt/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/bt/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/unity/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/unity/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/cmock/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/cmock/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/console/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/console/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/http_parser/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/http_parser/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp-tls/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp-tls/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_adc/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_adc/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_eth/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_eth/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_gdbstub/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_gdbstub/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_hid/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_hid/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/tcp_transport/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/tcp_transport/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_http_client/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_http_client/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_http_server/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_http_server/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_https_ota/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_https_ota/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_https_server/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_https_server/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_psram/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_psram/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_lcd/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_lcd/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/protobuf-c/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/protobuf-c/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/protocomm/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/protocomm/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_local_ctrl/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_local_ctrl/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/espcoredump/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/espcoredump/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/wear_levelling/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/wear_levelling/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/sdmmc/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/sdmmc/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/fatfs/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/fatfs/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/idf_test/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/idf_test/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/ieee802154/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/ieee802154/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/json/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/json/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/mqtt/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/mqtt/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/nvs_sec_provider/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/nvs_sec_provider/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/openthread/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/openthread/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/perfmon/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/perfmon/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/spiffs/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/spiffs/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/touch_element/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/touch_element/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/ulp/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/ulp/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/usb/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/usb/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/wifi_provisioning/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/wifi_provisioning/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/abobija__rc522/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/abobija__rc522/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/espressif__led_strip/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/espressif__led_strip/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/espressif__qrcode/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/espressif__qrcode/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/main/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/main/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/internal_rtc/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/internal_rtc/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/sntp_service/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/sntp_service/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/sys_device/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/sys_device/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/esp_firebase/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/esp_firebase/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/com_firestore/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/com_firestore/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/led_status/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/led_status/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/buzzer_status/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/buzzer_status/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/rfid_rc522/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/rfid_rc522/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/storage_spiffs/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/storage_spiffs/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/scan_wifi/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/scan_wifi/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/smartconfig_webserver/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/smartconfig_webserver/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc/sys_manage_dc/build/esp-idf/button/cmake_install.cmake")
+  include("C:/Users/Dev_minz/source_code_KLTN/New folder/sys_manage_dc_broken/sys_manage_dc/build/esp-idf/button/cmake_install.cmake")
 endif()
 

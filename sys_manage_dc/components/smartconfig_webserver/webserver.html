@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 WiFi Manager</title>
+    <!-- Giữ nguyên phần CSS -->
+    <style>
+      :root {
+          --primary: #2c3e50;
+          --secondary: #3498db;
+          --background: #f5f6fa;
+      }
+
+      * {
+          box-sizing: border-box;
+          font-family: 'Segoe UI', sans-serif;
+      }
+
+      body {
+          margin: 0;
+          padding: 20px;
+          background: var(--background);
+      }
+
+      .container {
+          max-width: 800px;
+          margin: 0 auto;
+      }
+
+      .header {
+          text-align: center;
+          margin-bottom: 30px;
+      }
+
+      .wifi-list {
+          background: white;
+          border-radius: 10px;
+          box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+          margin-bottom: 30px;
+          overflow: hidden;
+      }
+
+      .wifi-item {
+          padding: 15px 20px;
+          border-bottom: 1px solid #eee;
+          cursor: pointer;
+          transition: all 0.3s;
+          display: flex;
+          align-items: center;
+      }
+
+      .wifi-item:hover {
+          background: #f8f9fa;
+          transform: translateX(5px);
+      }
+
+      .wifi-icon {
+          width: 24px;
+          height: 24px;
+          margin-right: 15px;
+          fill: var(--secondary);
+      }
+
+      .form-container {
+          background: white;
+          padding: 25px;
+          border-radius: 10px;
+          box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+      }
+
+      .form-group {
+          margin-bottom: 20px;
+      }
+
+      input {
+          width: 100%;
+          padding: 12px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          font-size: 16px;
+          transition: border-color 0.3s;
+      }
+
+      input:focus {
+          outline: none;
+          border-color: var(--secondary);
+      }
+
+      button {
+          background: var(--secondary);
+          color: white;
+          border: none;
+          padding: 12px 25px;
+          border-radius: 5px;
+          cursor: pointer;
+          width: 100%;
+          font-size: 16px;
+          transition: opacity 0.3s;
+      }
+
+      button:hover {
+          opacity: 0.9;
+      }
+
+      .loading {
+          display: none;
+          text-align: center;
+          padding: 20px;
+          color: var(--primary);
+      }
+
+      .toast {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          background: var(--primary);
+          color: white;
+          padding: 15px 25px;
+          border-radius: 5px;
+          display: none;
+          animation: slideIn 0.3s;
+      }
+
+      @keyframes slideIn {
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
+      }
+  </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Phần HTML giữ nguyên -->
+        <div class="header">
+            <h1>ESP32 WiFi Manager</h1>
+            <p>Select a network to connect</p>
+        </div>
+
+        <div class="wifi-list" id="wifiList">
+            <div class="loading" id="loading">
+                Scanning WiFi networks...
+            </div>
+        </div>
+
+        <div class="form-container">
+            <form id="wifiForm" onsubmit="return handleSubmit(event)">
+                <div class="form-group">
+                    <input type="text" id="ssid" placeholder="Network name" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit">Connect</button>
+            </form>
+        </div>
+
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <script>
+        // Đảm bảo DOM đã load xong trước khi thực thi script
+        document.addEventListener('DOMContentLoaded', function() {
+            // Khởi tạo giá trị
+            let isConnecting = false;
+            
+            // Gọi hàm fetch networks khi trang load
+            fetchNetworks();
+        });
+
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            if(toast) {
+                toast.textContent = message;
+                toast.style.display = 'block';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, duration);
+            }
+        }
+
+        async function fetchNetworks() {
+            const loadingElement = document.getElementById('loading');
+            if(!loadingElement) {
+                console.error('Loading element not found!');
+                return;
+            }
+
+            try {
+                loadingElement.style.display = 'block';
+                const response = await fetch('/ssids');
+                const data = await response.json();
+                renderNetworks(data.ssids);
+            } catch (error) {
+                showToast('Failed to load networks');
+                console.error('Fetch error:', error);
+            } finally {
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        function renderNetworks(ssids) {
+            const container = document.getElementById('wifiList');
+            if(container) {
+                container.innerHTML = ssids.map(ssid => `
+                    <div class="wifi-item" onclick="selectNetwork('${ssid}')">
+                        <svg class="wifi-icon" viewBox="0 0 24 24">
+                            <path d="M12 21c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm6-9c0-3.3-2.7-6-6-6s-6 2.7-6 6"/>
+                        </svg>
+                        ${ssid}
+                    </div>
+                `).join('');
+            }
+        }
+
+        function selectNetwork(ssid) {
+            const ssidInput = document.getElementById('ssid');
+            const passwordInput = document.getElementById('password');
+            if(ssidInput && passwordInput) {
+                ssidInput.value = ssid;
+                passwordInput.focus();
+            }
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            if (window.isConnecting) return;
+
+            const ssid = document.getElementById('ssid')?.value;
+            const password = document.getElementById('password')?.value;
+
+            if(!ssid || !password) {
+                showToast('Please fill all fields');
+                return;
+            }
+
+            try {
+                window.isConnecting = true;
+                showToast('Connecting...');
+                
+                const response = await fetch('/post', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `ssid=${encodeURIComponent(ssid)}&password=${encodeURIComponent(password)}`
+                });
+
+                if (response.ok) {
+                    showToast('Connection successful!');
+                } else {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+            } catch (error) {
+                showToast('Connection failed. Please try again.');
+                console.error('Connection error:', error);
+            } finally {
+                window.isConnecting = false;
+            }
+        }
+    </script>
+</body>
+</html>
