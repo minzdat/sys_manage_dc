@@ -361,14 +361,14 @@ void rfid_pet_registration_task(void *pvParameters)
     if (rfid_response_queue == NULL) {
         ESP_LOGE(TAG, "Failed to create RFID event queue");
     } else {
-        ESP_LOGI(TAG, "RFID event queue created successfully");
+        ESP_LOGI(TAG, "RFID response queue created successfully");
     }
 
     rfid_delete_response_queue = xQueueCreate(10, sizeof(rfid_response_t));
     if (rfid_delete_response_queue == NULL) {
         ESP_LOGE(TAG, "Failed to create RFID event queue");
     } else {
-        ESP_LOGI(TAG, "RFID event queue created successfully");
+        ESP_LOGI(TAG, "RFID delete response queue created successfully");
     }
     
     rfid_event_t rfid_event;

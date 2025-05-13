@@ -1,4 +1,5 @@
 #include "app_config.h"
+#include "gen_pro_qr.h"
 
 #include <string.h>
 #include <stdlib.h>

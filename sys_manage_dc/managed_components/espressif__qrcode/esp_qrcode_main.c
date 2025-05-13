@@ -1,8 +1,8 @@
 /*
-* SPDX-FileCopyrightText: 2015-2021 Espressif Systems (Shanghai) CO LTD
-*
-* SPDX-License-Identifier: Apache-2.0
-*/
+ * SPDX-FileCopyrightText: 2015-2021 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #include <stdio.h>
 #include <esp_err.h>
@@ -96,12 +96,12 @@ esp_err_t esp_qrcode_generate(esp_qrcode_config_t *cfg, const char *text)
     }
 
     ESP_LOGI(TAG, "Encoding below text with ECC LVL %d & QR Code Version %d",
-            ecc_lvl, cfg->max_qrcode_version);
+             ecc_lvl, cfg->max_qrcode_version);
     ESP_LOGI(TAG, "%s", text);
     // Make and print the QR Code symbol
     bool ok = qrcodegen_encodeText(text, tempbuf, qrcode, ecc_lvl,
-                                qrcodegen_VERSION_MIN, cfg->max_qrcode_version,
-                                qrcodegen_Mask_AUTO, true);
+                                   qrcodegen_VERSION_MIN, cfg->max_qrcode_version,
+                                   qrcodegen_Mask_AUTO, true);
     if (ok && cfg->display_func) {
         cfg->display_func((esp_qrcode_handle_t)qrcode);
         err = ESP_OK;
@@ -110,16 +110,4 @@ esp_err_t esp_qrcode_generate(esp_qrcode_config_t *cfg, const char *text)
     free(qrcode);
     free(tempbuf);
     return err;
-}
-
-void generate_provisioning_qr_code() 
-{
-    char payload[150] = {"http://192.168.4.1/get"};
-
-    ESP_LOGI("QRCODE_TAG", "Scan this QR code from the provisioning application for Provisioning.");
-    
-    esp_qrcode_config_t cfg = ESP_QRCODE_CONFIG_DEFAULT();
-    esp_qrcode_generate(&cfg, payload);
-
-    ESP_LOGI("QRCODE_TAG", "If QR code is not visible, copy paste the below URL in a browser.\n%s?data=%s", QRCODE_BASE_URL, payload);
 }

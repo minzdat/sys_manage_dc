@@ -1,7 +1,7 @@
 {
     "version":            "1.1",
     "project_name":       "sys_manage_dc",
-    "project_version":    "1268df5-dirty",
+    "project_version":    "d841cf4-dirty",
     "project_path":       "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc",
     "idf_path":           "C:/Espressif/frameworks/esp-idf-v5.2.2",
     "build_dir":          "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build",
@@ -1165,7 +1165,7 @@
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/smartconfig_webserver/libsmartconfig_webserver.a",
-            "sources": [ "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/components/smartconfig_webserver/smartconfig_webserver.c", "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/components/smartconfig_webserver/app_http_server.c", "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/components/smartconfig_webserver/app_config.c", "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/webserver.html.S" ],
+            "sources": [ "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/components/smartconfig_webserver/smartconfig_webserver.c", "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/components/smartconfig_webserver/app_http_server.c", "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/components/smartconfig_webserver/app_config.c", "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/components/smartconfig_webserver/gen_pro_qr.c", "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/webserver.html.S" ],
             "include_dirs": [ "include" ]
         },
         "sntp_service": {
