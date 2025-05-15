@@ -434,7 +434,17 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
+  include("C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl__lvgl/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
   include("C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/main/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl_esp32_drivers/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)

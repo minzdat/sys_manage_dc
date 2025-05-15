@@ -48,7 +48,10 @@
         "esp_crt_bundle.h": "c",
         "internal_rtc.h": "c",
         "rfid_rc522.h": "c",
-        "qrcodegen.h": "c"
+        "qrcodegen.h": "c",
+        "semphr.h": "c",
+        "ft6x36.h": "c",
+        "com_firestore.h": "c"
     },
     "idf.customExtraVars": {
         "IDF_TARGET": "esp32s3"

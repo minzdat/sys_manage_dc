@@ -28,10 +28,14 @@
 #include "sys_device.h"
 #include "com_firestore.h"
 
-// Các macro định nghĩa
-#define SYNC_TIMER_PERIOD_US                (300000000)         // 5 phút
+#include "lvgl.h"
+#include "lvgl_helpers.h"
+#include "ui.h"
 
 static const char *TAG = "MAIN_TAG";
+
+// Các macro định nghĩa
+#define SYNC_TIMER_PERIOD_US                (300000000)         // 5 phút
 
 char *g_deviceId = NULL;
 char g_lastBootTime[TIME_STR_SIZE] = {0};
@@ -88,6 +92,60 @@ void sync_timer_init(void)
     ret = esp_timer_start_periodic(sync_timer, SYNC_TIMER_PERIOD_US);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to start timer: %s", esp_err_to_name(ret));
+    }
+}
+
+// Hàm này được gọi mỗi 1ms để tăng lv_tic
+void lv_tick_task(void *arg)
+{
+    (void)arg;
+    lv_tick_inc(1);
+}
+
+// Task khởi tạo giao diện người dùng
+static void gui_task(void *pvParameter)
+{
+    (void) pvParameter;
+    lv_init();
+
+    // Khởi tạo timer tăng lv_tick mỗi 1ms
+    esp_timer_handle_t lvgl_tick_timer;
+    esp_timer_create_args_t lvgl_tick_timer_args = {
+        .callback = lv_tick_task,
+        .arg = NULL,
+        .dispatch_method = ESP_TIMER_TASK,
+        .name = "lv_tick"
+    };
+    ESP_ERROR_CHECK(esp_timer_create(&lvgl_tick_timer_args, &lvgl_tick_timer));
+    ESP_ERROR_CHECK(esp_timer_start_periodic(lvgl_tick_timer, 1000));  // 1ms
+
+    lvgl_driver_init();
+
+    static lv_color_t buf1[LV_HOR_RES_MAX * 40];
+    static lv_color_t buf2[LV_HOR_RES_MAX * 40];
+    static lv_disp_draw_buf_t draw_buf;
+    lv_disp_draw_buf_init(&draw_buf, buf1, buf2, LV_HOR_RES_MAX * 40);
+
+    static lv_disp_drv_t disp_drv;
+    lv_disp_drv_init(&disp_drv);
+    disp_drv.hor_res = 240;
+    disp_drv.ver_res = 320;
+    disp_drv.flush_cb = disp_driver_flush;
+    disp_drv.draw_buf = &draw_buf;
+    lv_disp_drv_register(&disp_drv);
+
+    // Nếu có touch
+    lv_indev_drv_t indev_drv;
+    lv_indev_drv_init(&indev_drv);
+    indev_drv.type = LV_INDEV_TYPE_POINTER;
+    indev_drv.read_cb = touch_driver_read;
+    lv_indev_drv_register(&indev_drv);
+
+    ui_init();
+
+    while (1) {
+        vTaskDelay(pdMS_TO_TICKS(10));
+        lv_timer_handler();
     }
 }
 
@@ -169,4 +227,5 @@ void app_main(void)
     // Tạo task cập nhật thông tin thiết bị
     xTaskCreate(update_info_device_task, "update_info_device_task", 1024 * 8, NULL, 5, NULL);
     xTaskCreate(rfid_pet_registration_task, "rfid_pet_registration_task", 1024 * 8, NULL, 5, NULL);
+    xTaskCreatePinnedToCore(gui_task, "gui", 1024 * 8, NULL, 1, NULL, 1);
 }

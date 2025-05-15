@@ -66,7 +66,9 @@ $<TARGET_FILE:__idf_wifi_provisioning>
 $<TARGET_FILE:__idf_abobija__rc522>
 $<TARGET_FILE:__idf_espressif__led_strip>
 $<TARGET_FILE:__idf_espressif__qrcode>
+$<TARGET_FILE:__idf_lvgl__lvgl>
 $<TARGET_FILE:__idf_main>
+$<TARGET_FILE:__idf_lvgl_esp32_drivers>
 $<TARGET_FILE:__idf_internal_rtc>
 $<TARGET_FILE:__idf_sntp_service>
 $<TARGET_FILE:__idf_sys_device>

@@ -667,6 +667,13 @@ C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/esp
 C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/espressif__qrcode/CMakeFiles/install.dir
 C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/espressif__qrcode/CMakeFiles/install/local.dir
 C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/espressif__qrcode/CMakeFiles/install/strip.dir
+C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl__lvgl/CMakeFiles/__idf_lvgl__lvgl.dir
+C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl__lvgl/CMakeFiles/edit_cache.dir
+C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl__lvgl/CMakeFiles/rebuild_cache.dir
+C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl__lvgl/CMakeFiles/list_install_components.dir
+C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl__lvgl/CMakeFiles/install.dir
+C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl__lvgl/CMakeFiles/install/local.dir
+C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl__lvgl/CMakeFiles/install/strip.dir
 C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/main/CMakeFiles/__idf_main.dir
 C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/main/CMakeFiles/edit_cache.dir
 C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/main/CMakeFiles/rebuild_cache.dir
@@ -674,6 +681,13 @@ C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/mai
 C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/main/CMakeFiles/install.dir
 C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/main/CMakeFiles/install/local.dir
 C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/main/CMakeFiles/install/strip.dir
+C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl_esp32_drivers/CMakeFiles/__idf_lvgl_esp32_drivers.dir
+C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl_esp32_drivers/CMakeFiles/edit_cache.dir
+C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl_esp32_drivers/CMakeFiles/rebuild_cache.dir
+C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl_esp32_drivers/CMakeFiles/list_install_components.dir
+C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl_esp32_drivers/CMakeFiles/install.dir
+C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl_esp32_drivers/CMakeFiles/install/local.dir
+C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/lvgl_esp32_drivers/CMakeFiles/install/strip.dir
 C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/internal_rtc/CMakeFiles/__idf_internal_rtc.dir
 C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/internal_rtc/CMakeFiles/edit_cache.dir
 C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build/esp-idf/internal_rtc/CMakeFiles/rebuild_cache.dir

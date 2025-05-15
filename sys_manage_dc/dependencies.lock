@@ -30,11 +30,19 @@ dependencies:
     source:
       type: idf
     version: 5.2.2
+  lvgl/lvgl:
+    component_hash: d7c1ac037ae6e85d94897f807d6e7ba0946a83e720074fc95a4f6241da9f9f53
+    dependencies: []
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 8.4.0
 direct_dependencies:
 - abobija/rc522
 - espressif/led_strip
 - espressif/qrcode
 - idf
-manifest_hash: 548a55fa86c875401b345bdf6f5baea763b7ae0310cab487047bd901e964b5c8
+- lvgl/lvgl
+manifest_hash: 4982b89ca0d9405337585684f3bdd368c477cb82904c1c48b9a1e9273b30f696
 target: esp32s3
 version: 2.0.0

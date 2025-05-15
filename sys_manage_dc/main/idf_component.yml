@@ -17,3 +17,4 @@ dependencies:
   espressif/qrcode: ^0.1.0~2
   espressif/led_strip: ^3.0.1
   abobija/rc522: ^3.3.1
+  lvgl/lvgl: ^8.3.11
