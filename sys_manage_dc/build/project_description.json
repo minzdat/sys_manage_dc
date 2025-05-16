@@ -1,7 +1,7 @@
 {
     "version":            "1.1",
     "project_name":       "sys_manage_dc",
-    "project_version":    "73a81ba-dirty",
+    "project_version":    "15cba1b-dirty",
     "project_path":       "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc",
     "idf_path":           "C:/Espressif/frameworks/esp-idf-v5.2.2",
     "build_dir":          "C:/Users/Dev_minz/source_code_KLTN/sys_manage_dc/sys_manage_dc/build",
